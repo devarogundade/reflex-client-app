@@ -43,7 +43,7 @@ import IconBlockchain from '../icons/IconBoxTick.vue'
 
 <style scoped>
 section {
-    background-color: var(--gray-light);
+    background-color: var(--background-gray);
     padding: 100px 0;
     padding-top: 200px;
 }

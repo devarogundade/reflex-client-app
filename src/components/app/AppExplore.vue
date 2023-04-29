@@ -39,7 +39,7 @@ import IconPeople from '../icons/IconPeople.vue';
 section {
     padding-top: 200px;
     padding-bottom: 100px;
-    background-color: var(--gray-light);
+    background-color: var(--background-gray);
 }
 
 .explore_container {

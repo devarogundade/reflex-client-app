@@ -7,6 +7,7 @@ import DaoView from '@/views/DaoView.vue'
 import LandingPage from '@/pages/LandingPage.vue'
 import AppExplorePage from '@/pages/AppExplorePage.vue'
 import DaoDetailPage from '@/pages/DaoDetailPage.vue'
+import DaoCreatePage from '@/pages/DaoCreatePage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,10 @@ const router = createRouter({
         path: '/app/daos/:id',
         name: 'app-daos-dao',
         component: DaoDetailPage
+      }, {
+        path: '/app/create',
+        name: 'app-create',
+        component: DaoCreatePage
       }]
     }
   ]
