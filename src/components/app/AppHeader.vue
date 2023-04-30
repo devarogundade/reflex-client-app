@@ -28,18 +28,25 @@
                     </a>
                 </div>
                 <div class="header_actions">
-                    <RouterLink to="/app">
-                        <div class="header_action">
-                            <IconWallet :color="'var(--background)'" />
-                            <p>Connect Wallet</p>
-                        </div>
-                    </RouterLink>
+                    <div class="header_action connect_wallet" v-if="!walletConnected && !walletConnecting" v-on:click="connect()">
+                        <IconWallet :color="'var(--background)'" />
+                        <p>Connect Wallet</p>
+                    </div>
+                    <div class="header_action connect_wallet" v-if="!walletConnected && walletConnecting">
+                        <IconWallet :color="'var(--background)'" />
+                        <p>Scanning Wallet</p>
+                    </div>
+                    <div class="header_action connect_wallet" v-on:click="disconnect()" v-if="walletConnected && !walletConnecting">
+                        <IconWallet :color="'var(--background)'" />
+                        <p>{{ walletInfo }}</p>
+                    </div>
                     <a href="" target="_blank">
                         <div class="header_action">
                             <IconCode :color="'var(--white)'" />
                             <p>Developers</p>
                         </div>
                     </a>
+                    {{ walletName }}
                 </div>
             </header>
         </div>
@@ -51,6 +58,81 @@ import IconCode from '../icons/IconCode.vue';
 import IconWallet from '../icons/IconWallet.vue';
 </script>
 
+<script>
+import { mapState } from 'vuex';
+import {walletDetector, BrowserWindowMessageConnection, RpcConnectionDenyError,} from '@aeternity/aepp-sdk';
+export default {
+    data: () => ({
+        connectMethod: 'default',
+        walletConnected: false,
+        walletConnecting: null,
+        reverseIframe: null,
+        reverseIframeWalletUrl: 'https://wallet.superhero.com/',
+        walletInfo: null,
+    }),
+    computed: {
+        ...mapState(['aeSdk']),
+        walletName() {
+            console.log(this.aeSdk);
+            if (!this.aeSdk) return 'SDK is not ready';
+            if (!this.walletConnected) return 'Wallet is not connected';
+            return this.walletInfo.name;
+        },
+    },
+    methods: {
+        async scanForWallets() {
+            return new Promise((resolve) => {
+                let stopScan;
+
+                const handleWallets = async ({ wallets, newWallet }) => {
+                    console.log(wallets);
+                    newWallet = newWallet || Object.values(wallets)[0];
+                    console.log(newWallet);
+                    if (confirm(`Do you want to connect to wallet ${newWallet.info.name} with id ${newWallet.info.id}`)) {
+                        stopScan();
+                        resolve(newWallet.getConnection());
+                    }
+                };
+
+                const scannerConnection = new BrowserWindowMessageConnection();
+                stopScan = walletDetector(scannerConnection, handleWallets);
+            });
+        },
+        async connect() {
+            this.walletConnecting = true;
+            try {
+                if (this.connectMethod === 'reverse-iframe') {
+                    this.reverseIframe = document.createElement('iframe');
+                    this.reverseIframe.src = this.reverseIframeWalletUrl;
+                    this.reverseIframe.style.display = 'none';
+                    document.body.appendChild(this.reverseIframe);
+                }
+
+                const connection = await this.scanForWallets();
+            
+                try {
+                    this.walletInfo = await this.aeSdk.connectToWallet(connection);
+                } catch (error) {
+                    if (error instanceof RpcConnectionDenyError) connection.disconnect();
+                    throw error;
+                }
+                this.walletConnected = true;
+                const { address: { current } } = await this.aeSdk.subscribeAddress('subscribe', 'connected');
+                this.$store.commit('setAddress', Object.keys(current)[0]);
+            } finally {
+                this.walletConnecting = false;
+            }
+        },
+        async disconnect() {
+            await this.aeSdk.disconnectWallet();
+            this.walletConnected = false;
+            if (this.reverseIframe) this.reverseIframe.remove();
+            this.$emit('aeSdk', null);
+        },
+    },
+};
+</script>
+
 <style scoped>
 section {
     position: fixed;
@@ -59,7 +141,7 @@ section {
     width: 100%;
     backdrop-filter: blur(12px);
     z-index: 10;
-    background-color: #cf2e2e75;
+    background-color: #de3f6c7a;
 }
 
 header {
@@ -109,7 +191,7 @@ header {
     border-radius: 12px;
 }
 
-.header_actions a:first-child .header_action {
+.header_actions .connect_wallet {
     background-color: var(--white);
 }
 
@@ -117,7 +199,7 @@ header {
     border: 2px var(--white) solid;
 }
 
-.header_actions a:first-child .header_action p {
+.header_actions .connect_wallet p {
     font-size: 16px;
     font-weight: 500;
     color: var(--background);

@@ -59,7 +59,7 @@ section {
     width: 100%;
     backdrop-filter: blur(12px);
     z-index: 10;
-    background-color: #cf2e2e75;
+    background-color: #de3f6c7a;
 }
 
 header {

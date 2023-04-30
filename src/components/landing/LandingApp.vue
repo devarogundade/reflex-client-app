@@ -167,7 +167,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 20px;
-    background-color: #dd3b3b;
+    background-color: #f04e7c;
 }
 
 .app_no_code_content p {
@@ -203,7 +203,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 30px;
-    background-color: #dd3b3b;
+    background-color: #f04e7c;
 }
 
 .app_governance_content p {
@@ -232,7 +232,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 30px;
-    background-color: #dd3b3b;
+    background-color: #f04e7c;
 }
 
 .app_dao_content p {
@@ -257,7 +257,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
     padding: 100px 40px;
     width: 100%;
     gap: 30px;
-    background-color: #dd3b3b;
+    background-color: #f04e7c;
     margin-top: 30px;
 }
 
