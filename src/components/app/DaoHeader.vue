@@ -28,12 +28,18 @@
                     </a>
                 </div>
                 <div class="header_actions">
-                    <RouterLink to="/app">
-                        <div class="header_action">
-                            <IconWallet :color="'var(--background)'" />
-                            <p>Connect Wallet</p>
-                        </div>
-                    </RouterLink>
+                    <div class="header_action connect_wallet" v-on:click="disconnect()" v-if="$store.state.address">
+                        <IconWallet :color="'var(--background)'" />
+                        <p>{{ $store.state.address }}</p>
+                    </div>
+                    <div class="header_action connect_wallet" v-else-if="!walletConnected && !walletConnecting"
+                        v-on:click="connect()">
+                        <IconWallet :color="'var(--background)'" />
+                        <p>Connect Wallet</p>>
+                    </div>
+                    <div class="header_action connect_wallet" v-else>
+                        <img src="/images/loading_logo.svg">
+                    </div>
                 </div>
             </header>
         </div>
@@ -42,6 +48,77 @@
 
 <script setup>
 import IconWallet from '../icons/IconWallet.vue';
+</script>
+
+<script>
+import { mapState } from 'vuex';
+import { walletDetector, BrowserWindowMessageConnection, RpcConnectionDenyError, } from '@aeternity/aepp-sdk';
+export default {
+    data: () => ({
+        connectMethod: 'default',
+        walletConnected: false,
+        walletConnecting: null,
+        reverseIframe: null,
+        reverseIframeWalletUrl: 'https://wallet.superhero.com/',
+        walletInfo: null,
+    }),
+    computed: {
+        ...mapState(['aeSdk']),
+        walletName() {
+            if (!this.aeSdk) return 'SDK is not ready';
+            if (!this.walletConnected) return 'Wallet is not connected';
+            return this.walletInfo.name;
+        },
+    },
+    methods: {
+        async scanForWallets() {
+            return new Promise((resolve) => {
+                let stopScan;
+
+                const handleWallets = async ({ wallets, newWallet }) => {
+                    newWallet = newWallet || Object.values(wallets)[0];
+                    stopScan();
+                    resolve(newWallet.getConnection());
+                };
+
+                const scannerConnection = new BrowserWindowMessageConnection();
+                stopScan = walletDetector(scannerConnection, handleWallets);
+            });
+        },
+        async connect() {
+            this.walletConnecting = true;
+            try {
+                if (this.connectMethod === 'reverse-iframe') {
+                    this.reverseIframe = document.createElement('iframe');
+                    this.reverseIframe.src = this.reverseIframeWalletUrl;
+                    this.reverseIframe.style.display = 'none';
+                    document.body.appendChild(this.reverseIframe);
+                }
+
+                const connection = await this.scanForWallets();
+
+                try {
+                    this.walletInfo = await this.aeSdk.connectToWallet(connection);
+                } catch (error) {
+                    if (error instanceof RpcConnectionDenyError) connection.disconnect();
+                    throw error;
+                }
+                this.walletConnected = true;
+                const { address: { current } } = await this.aeSdk.subscribeAddress('subscribe', 'connected');
+                this.$store.commit('setAddress', Object.keys(current)[0]);
+                console.log(this.aeSdk);
+            } finally {
+                this.walletConnecting = false;
+            }
+        },
+        async disconnect() {
+            await this.aeSdk.disconnectWallet();
+            this.walletConnected = false;
+            if (this.reverseIframe) this.reverseIframe.remove();
+            this.$emit('aeSdk', null);
+        },
+    },
+};
 </script>
 
 <style scoped>
@@ -102,11 +179,11 @@ header {
     border-radius: 12px;
 }
 
-.header_actions a:first-child .header_action {
+.header_actions .header_action {
     background-color: var(--white);
 }
 
-.header_actions a:first-child .header_action p {
+.header_actions .header_action p {
     font-size: 16px;
     font-weight: 500;
     color: var(--background);

@@ -27,7 +27,7 @@ const store = createStore({
             },
             onAddressChange: ({ current }) => store.commit('setAddress', Object.keys(current)[0]),
             onDisconnect: () => alert('Aepp is disconnected'),
-        })),
+        }))
     },
     mutations: {
         setAddress(state, address) {

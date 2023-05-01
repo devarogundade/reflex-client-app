@@ -28,17 +28,17 @@
                     </a>
                 </div>
                 <div class="header_actions">
-                    <div class="header_action connect_wallet" v-if="!walletConnected && !walletConnecting" v-on:click="connect()">
+                    <div class="header_action connect_wallet" v-on:click="disconnect()" v-if="$store.state.address">
+                        <IconWallet :color="'var(--background)'" />
+                        <p>{{ $store.state.address }}</p>
+                    </div>
+                    <div class="header_action connect_wallet" v-else-if="!walletConnected && !walletConnecting"
+                        v-on:click="connect()">
                         <IconWallet :color="'var(--background)'" />
                         <p>Connect Wallet</p>
                     </div>
-                    <div class="header_action connect_wallet" v-if="!walletConnected && walletConnecting">
-                        <IconWallet :color="'var(--background)'" />
-                        <p>Scanning Wallet</p>
-                    </div>
-                    <div class="header_action connect_wallet" v-on:click="disconnect()" v-if="walletConnected && !walletConnecting">
-                        <IconWallet :color="'var(--background)'" />
-                        <p>{{ walletInfo }}</p>
+                    <div class="header_action connect_wallet" v-else>
+                        <img src="/images/loading_logo.svg">
                     </div>
                     <a href="" target="_blank">
                         <div class="header_action">
@@ -46,7 +46,6 @@
                             <p>Developers</p>
                         </div>
                     </a>
-                    {{ walletName }}
                 </div>
             </header>
         </div>
@@ -60,7 +59,7 @@ import IconWallet from '../icons/IconWallet.vue';
 
 <script>
 import { mapState } from 'vuex';
-import {walletDetector, BrowserWindowMessageConnection, RpcConnectionDenyError,} from '@aeternity/aepp-sdk';
+import { walletDetector, BrowserWindowMessageConnection, RpcConnectionDenyError, } from '@aeternity/aepp-sdk';
 export default {
     data: () => ({
         connectMethod: 'default',
@@ -73,7 +72,6 @@ export default {
     computed: {
         ...mapState(['aeSdk']),
         walletName() {
-            console.log(this.aeSdk);
             if (!this.aeSdk) return 'SDK is not ready';
             if (!this.walletConnected) return 'Wallet is not connected';
             return this.walletInfo.name;
@@ -87,7 +85,6 @@ export default {
                 const handleWallets = async ({ wallets, newWallet }) => {
                     console.log(wallets);
                     newWallet = newWallet || Object.values(wallets)[0];
-                    console.log(newWallet);
                     if (confirm(`Do you want to connect to wallet ${newWallet.info.name} with id ${newWallet.info.id}`)) {
                         stopScan();
                         resolve(newWallet.getConnection());
@@ -109,7 +106,7 @@ export default {
                 }
 
                 const connection = await this.scanForWallets();
-            
+
                 try {
                     this.walletInfo = await this.aeSdk.connectToWallet(connection);
                 } catch (error) {
@@ -184,6 +181,7 @@ header {
 .header_action {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     cursor: pointer;
     height: 48px;
@@ -193,6 +191,11 @@ header {
 
 .header_actions .connect_wallet {
     background-color: var(--white);
+    min-width: 190px;
+}
+
+.connect_wallet img {
+    width: 30px;
 }
 
 .header_actions a:last-child .header_action {

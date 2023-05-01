@@ -42,7 +42,6 @@
                 </div>
             </div>
 
-
             <div class="dao_container">
                 <div class="proposal_container">
                     <div class="proposal_created">
@@ -88,11 +87,13 @@
 
                 <div class="proposal2_container">
                     <div class="token_container">
-                        <img src="/images/tokentransfer.png" alt="">
+                        <img src="/images/token-transfer.svg" alt="">
                         <h3>Initiate a token transfer</h3>
                         <p>Ready to distribute tokens or send funds? Initiate a token transfer here. For ideas on how to
                             distribute your community's token, read our guide on token distribution.</p>
-                        <button>Initiate transfer</button>
+                        <button
+                            v-on:click="createOrChangeAllowance(aeSdk ,'ct_2pT2mj7s1NnUkWoY4trcisk2MWnq8zj3qsUatemUwXKkZ42qVe', 'ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688', 10000)">Initiate
+                            transfer</button>
                     </div>
 
                     <div class="member_container">
@@ -135,6 +136,16 @@ import IconBox from '../icons/IconBox.vue'
 import IconBoxTick from '../icons/IconBoxTick.vue'
 import IconPeople from '../icons/IconPeople.vue';
 import IconOut from '../icons/IconOut.vue'
+import { createOrChangeAllowance, getTokenBalance } from '../../scripts/aeternity'
+</script>
+
+<script>
+import { mapState } from 'vuex';
+export default {
+    computed: {
+        ...mapState(['aeSdk'])
+    },
+}
 </script>
 
 <style scoped>
@@ -427,7 +438,8 @@ section {
 }
 
 .token_container img {
-    height: 160px;
+    height: 200px;
+    transform: scale(1.5, 1.5);
 }
 
 .token_container h3 {
