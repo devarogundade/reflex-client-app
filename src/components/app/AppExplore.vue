@@ -4,7 +4,7 @@
             <div class="explore_container">
                 <h3 class="explore_container_title">Explore DAOs</h3>
                 <div class="apps">
-                    <RouterLink v-for="i in 6" :key="i" :to="`/app/daos/${i}`">
+                    <RouterLink v-for="dao, i in allDaos" :key="i" :to="`/app/daos/${dao}`">
                         <div class="app">
                             <div class="app_head">
                                 <img src="https://ipfs.eth.aragon.network/ipfs/QmS4TURPPg75etrhFS9z6S6mo2ZzsEq5BmRL463dGbUt9J"
@@ -33,6 +33,25 @@
 
 <script setup>
 import IconPeople from '../icons/IconPeople.vue';
+</script>
+
+<script>
+import { mapState } from 'vuex';
+import { daos } from '../../scripts/aeternity';
+export default {
+    computed: {
+        ...mapState(['aeSdk']),
+    },
+    data() {
+        return {
+            allDaos: []
+        }
+    },
+    async mounted() {
+        const result = await daos(this.aeSdk)
+        this.allDaos = result.decodedResult
+    }
+}
 </script>
 
 <style scoped>

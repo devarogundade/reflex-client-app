@@ -35,7 +35,7 @@
                     <div class="header_action connect_wallet" v-else-if="!walletConnected && !walletConnecting"
                         v-on:click="connect()">
                         <IconWallet :color="'var(--background)'" />
-                        <p>Connect Wallet</p>>
+                        <p>Connect Wallet</p>
                     </div>
                     <div class="header_action connect_wallet" v-else>
                         <img src="/images/loading_logo.svg">

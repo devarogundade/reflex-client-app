@@ -7,7 +7,7 @@
                         <h1>YatsuDAO_Ryufukuji</h1>
                         <p class="domain">yatsudao-rfj.dao.eth</p>
                         <div class="link">
-                            <p>https://reflex.netlify.app/app/daos/0x84fa389b5f9486b30354f0787424168caad6b4fb</p>
+                            <p>{{ `https://reflex-protocol.netlify.app/app/daos/${$route.params.id}` }}</p>
                             <IconCopy :color="'var(--background)'" />
                         </div>
                         <p class="detail_head_text_desc">
@@ -92,7 +92,7 @@
                         <p>Ready to distribute tokens or send funds? Initiate a token transfer here. For ideas on how to
                             distribute your community's token, read our guide on token distribution.</p>
                         <button
-                            v-on:click="createOrChangeAllowance(aeSdk ,'ct_2pT2mj7s1NnUkWoY4trcisk2MWnq8zj3qsUatemUwXKkZ42qVe', 'ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688', 10000)">Initiate
+                            v-on:click="createOrChangeAllowance(aeSdk, 'ct_2pT2mj7s1NnUkWoY4trcisk2MWnq8zj3qsUatemUwXKkZ42qVe', 'ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688', 10000)">Initiate
                             transfer</button>
                     </div>
 
@@ -136,7 +136,9 @@ import IconBox from '../icons/IconBox.vue'
 import IconBoxTick from '../icons/IconBoxTick.vue'
 import IconPeople from '../icons/IconPeople.vue';
 import IconOut from '../icons/IconOut.vue'
-import { createOrChangeAllowance, getTokenBalance } from '../../scripts/aeternity'
+import {
+    createOrChangeAllowance,
+} from '../../scripts/aeternity'
 </script>
 
 <script>

@@ -4,11 +4,11 @@
             <div class="create_head">
                 <div class="create_head_title">
                     <p>Create your DAO</p>
-                    <p>Step {{ step }} of 3</p>
+                    <p>Step {{ step }} of 4</p>
                 </div>
 
                 <div class="progress">
-                    <div class="progress_bar" :style="`width: ${(step / 3) * 100}%`"></div>
+                    <div class="progress_bar" :style="`width: ${(step / 4) * 100}%`"></div>
                 </div>
 
                 <div class="create_head_desc" v-if="step == 1">
@@ -29,6 +29,12 @@
                     <p>These settings determine how voting works in your DAO. Read best practices for governance settings in
                         this guide.</p>
                 </div>
+
+                <div class="create_head_desc" v-if="step == 4">
+                    <h1>Set governance reward</h1>
+                    <p>Define how your want to reward your DAO member for participating in improvement proposal creation and
+                        voting with vote receipt NFT staking.</p>
+                </div>
             </div>
 
             <div class="dao_form">
@@ -37,32 +43,30 @@
                         <p class="title">DAO name</p>
                         <p class="desc">Maximum of 128 characters</p>
                         <div class="input">
-                            <input type="text" placeholder="Type your DAO's name...">
+                            <input v-model="dao.name" type="text" placeholder="Type your DAO's name...">
                         </div>
                         <p class="count">0/128</p>
                     </div>
 
                     <div class="label" v-show="step == 1">
-                        <p class="title">ENS Subdomain</p>
-                        <p class="desc">This will be your DAO’s unique ENS subdomain, created automatically for you.
+                        <p class="title">AENS Subdomain</p>
+                        <p class="desc">This will be your DAO’s AENS unique subdomain, created automatically for you.
                             Lowercase letters, numbers, and the dash '-' are all acceptable characters; ideally, the
                             character count should be under 128.</p>
                         <div class="input">
-                            <input type="text" placeholder="Type your DAO's name...">
-                            <div class="input_tag">.dao.aes</div>
+                            <input v-model="dao.subdomain" type="text" placeholder="Type your DAO's name...">
+                            <div class="input_tag">.rf.chain</div>
                         </div>
                         <p class="count">0/128</p>
                     </div>
 
                     <div class="label" v-show="step == 1">
                         <p class="title">Logo <span>Optional</span></p>
-                        <p class="desc">This will be your DAO’s unique ENS subdomain, created automatically for you.
-                            Lowercase letters, numbers, and the dash '-' are all acceptable characters; ideally, the
-                            character count should be under 128.</p>
+                        <p class="desc">This will be your DAO’s logoUri image</p>
 
                         <div class="input_file">
-                            <IconAdd />
-                            <input type="file" hidden>
+                            <IconImageAdd />
+                            <input v-on:change="pickLogo($event)" type="file" accept="image/*">
                         </div>
                     </div>
 
@@ -72,21 +76,22 @@
                             so new contributors can find you.
                         </p>
                         <div class="input">
-                            <textarea rows="5" type="text" placeholder="Type your summary..."></textarea>
+                            <textarea v-model="dao.summary" rows="5" type="text"
+                                placeholder="Type your summary..."></textarea>
                         </div>
                     </div>
 
                     <div class="label" v-show="step == 1">
-                        <p class="title">Links</p>
+                        <p class="title">Links <span>Optional</span></p>
                         <p class="desc">Links to your DAO's website, social media profiles, Discord, or other places your
                             community gathers.</p>
-                        <div class="link_container" v-if="links.length > 0">
+                        <div class="link_container" v-if="dao.links.length > 0">
                             <div class="link_grid">
                                 <p class="link_name">Name / Description</p>
                                 <p class="link_name">Link</p>
                                 <p></p>
                             </div>
-                            <div class="link_grid" v-for="link, i in links" :key="i">
+                            <div class="link_grid" v-for="link, i in dao.links" :key="i">
                                 <div class="input">
                                     <input type="text" v-model="link.name" placeholder="Medium, Discord, etc.">
                                 </div>
@@ -96,7 +101,7 @@
                                 <IconTrash v-on:click="removeLink(i)" />
                             </div>
                         </div>
-                        <button v-if="links.length < 5" v-on:click="addLink()">Add link</button>
+                        <button v-if="dao.links.length < 5" v-on:click="addLink()">Add link</button>
                     </div>
 
                     <!--  -->
@@ -104,7 +109,8 @@
                     <div class="label" v-show="step == 2">
                         <p class="title">Who can participate in governance?</p>
                         <div class="participate_options">
-                            <div class="option">
+                            <div v-on:click="dao.participation = 0"
+                                :class="dao.participation == 0 ? 'option option_active' : 'option'">
                                 <div class="option_text">
                                     <h6>Token holders</h6>
                                     <p>Tokens act as voting chips. The more tokens you hold, the more weight your vote has.
@@ -115,7 +121,8 @@
                                 </div>
                             </div>
 
-                            <div class="option">
+                            <div v-on:click="dao.participation = 1"
+                                :class="dao.participation == 1 ? 'option option_active' : 'option'">
                                 <div class="option_text">
                                     <h6>Multisig members</h6>
                                     <p>Only multisig members can vote. 1 wallet address equals 1 approval.</p>
@@ -127,68 +134,114 @@
                         </div>
                     </div>
 
-                    <div class="label" v-show="step == 2">
+                    <div class="label" v-show="step == 2 && dao.participation == 0">
                         <p class="title">Mint your token</p>
                         <p class="desc">Define the token details and distribute tokens to a core team and DAO treasury. For
                             more on token minting best practices, read this guide</p>
                     </div>
 
-                    <div class="label" v-show="step == 2">
+                    <div class="label" v-show="step == 2 && dao.participation == 0">
                         <p class="title">Name</p>
-                        <p class="desc">The full name of the token. Example: Uniswap</p>
+                        <p class="desc">The full name of the token. Example: My Token</p>
                         <div class="input">
-                            <input type="text" placeholder="">
+                            <input v-model="dao.tokenName" type="text" placeholder="">
                         </div>
                     </div>
 
-                    <div class="label" v-show="step == 2">
+                    <div class="label" v-show="step == 2 && dao.participation == 0">
                         <p class="title">Symbol</p>
-                        <p class="desc">The abbreviation of the token. Example: UNI</p>
+                        <p class="desc">The abbreviation of the token. Example: MYT</p>
                         <div class="input">
-                            <input type="text" placeholder="">
+                            <input v-model="dao.tokenSymbol" type="text" placeholder="">
                         </div>
                     </div>
 
-                    <div class="label" v-show="step == 2">
+                    <div class="label" v-show="step == 2 && dao.participation == 0">
                         <p class="title">Distribute tokens</p>
                         <p class="desc">Add the wallets you'd like to distribute tokens to. If you need help distributing
                             tokens</p>
-                        <div class="address_container" v-if="addresses.length > 0">
+                        <div class="address_container" v-if="dao.tokenAllocations.length > 0">
                             <div class="address_grid">
                                 <p class="address_name">Address</p>
                                 <p class="address_name">Tokens</p>
                                 <p class="address_name">Allocation</p>
                                 <p></p>
                             </div>
-                            <div class="address_grid" v-for="address, i in addresses" :key="i">
+                            <div class="address_grid" v-for="allocation, i in dao.tokenAllocations" :key="i">
                                 <div class="input">
-                                    <input type="text" v-model="address.address" placeholder="0x...">
+                                    <input type="text" v-model="allocation.address" placeholder="ak...">
                                 </div>
                                 <div class="input">
-                                    <input type="number" v-model="address.tokens" min="0" placeholder="0"
+                                    <input type="number" v-model="allocation.tokens" min="0" placeholder="0"
                                         style="text-align: center;">
                                 </div>
                                 <div class="input">
-                                    <input type="text" disabled value="100%"
+                                    <input type="text" disabled :value="((allocation.tokens / totalSupply) * 100) + '%'"
                                         style="background-color: var(--background-gray); text-align: center;">
                                 </div>
-                                <IconTrash v-on:click="removeWallet(i)" />
+                                <IconTrash v-on:click="removeAllocation(i)" />
+                            </div>
+                            <br> <br>
+                            <div class="address_grid">
+                                <p class="address_name">{{ dao.tokenAllocations.length }} Addresses</p>
+                                <p class="address_name">Initial Supply: {{ totalSupply }}</p>
+                                <p class="address_name"></p>
+                                <p></p>
                             </div>
                         </div>
-                        <button v-if="addresses.length < 15" v-on:click="addWallet()">Add wallet</button>
+                        <button v-if="dao.tokenAllocations.length < 15" v-on:click="addAllocation()">Add wallet</button>
+                    </div>
+
+                    <div class="label" v-show="step == 2 && dao.participation == 1">
+                        <p class="title">Distribute tokens</p>
+                        <p class="desc">Add the wallets you'd like to distribute tokens to. If you need help distributing
+                            tokens</p>
+                        <div class="address_container" v-if="dao.multisigMembers.length > 0">
+                            <div class="address_grid">
+                                <p class="address_name">Address</p>
+                                <p class="address_name">Power</p>
+                                <p class="address_name">Allocation</p>
+                                <p></p>
+                            </div>
+                            <div class="address_grid" v-for="member, i in dao.multisigMembers" :key="i">
+                                <div class="input">
+                                    <input type="text" v-model="member.address" placeholder="ak...">
+                                </div>
+                                <div class="input">
+                                    <input type="number" v-model="member.powers" min="0" placeholder="0"
+                                        style="text-align: center;">
+                                </div>
+                                <div class="input">
+                                    <input type="text" disabled :value="((member.powers / totalPower) * 100) + '%'"
+                                        style="background-color: var(--background-gray); text-align: center;">
+                                </div>
+                                <IconTrash v-on:click="removeMember(i)" />
+                            </div>
+                            <br> <br>
+                            <div class="address_grid">
+                                <p class="address_name">{{ dao.multisigMembers.length }} Addresses</p>
+                                <p class="address_name">Total Power: {{ totalPower }}</p>
+                                <p class="address_name"></p>
+                                <p></p>
+                            </div>
+                        </div>
+                        <button v-if="dao.tokenAllocations.length < 25" v-on:click="addMember()">Add member</button>
                     </div>
 
                     <div class="label" v-show="step == 2">
                         <p class="title">Proposal creation</p>
-                        <p class="desc">Specify who is permitted to create proposals and what the minimum token requirement
+                        <p class="desc">Specify who is permitted to create proposals and what the minimum {{ dao.participation == 0 ? 'token' : 'power' }} requirement
                             is.</p>
                         <div class="specify_container">
                             <div class="participate_options">
                                 <p class="title">Who is eligible?</p>
-                                <div class="option">
+                                <div v-on:click="dao.proposalCreation = 0"
+                                    :class="dao.proposalCreation == 0 ? 'option option_active' : 'option'">
                                     <div class="option_text">
-                                        <h6>Token holders</h6>
-                                        <p>Only token holders with a certain number of tokens are eligible to create
+                                        <h6 v-if="dao.participation == 0">Token holders</h6>
+                                        <h6 v-if="dao.participation == 1">Multisig members</h6>
+                                        <p>Only {{ dao.participation == 0 ? 'token holders' : 'multisig members' }} with a certain number of 
+                                            {{ dao.participation == 0 ? 'tokens' : 'powers' }} are eligible to create
                                             proposals.</p>
                                     </div>
                                     <div class="option_dot">
@@ -196,7 +249,8 @@
                                     </div>
                                 </div>
 
-                                <div class="option">
+                                <div v-on:click="dao.proposalCreation = 1"
+                                    :class="dao.proposalCreation == 1 ? 'option option_active' : 'option'">
                                     <div class="option_text">
                                         <h6>Any wallet</h6>
                                         <p>Any wallet can create proposals.</p>
@@ -206,10 +260,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tokens_required">
-                                <p class="title">Minimum tokens Required</p>
+                            <div class="tokens_required" :style="dao.proposalCreation == 1 ? 'opacity: 0.5' : ''">
+                                <p class="title">Minimum {{ dao.participation == 0 ? 'tokens' : 'powers' }} Required</p>
                                 <div class="input">
-                                    <input type="number" min="1" placeholder="0" style="text-align: center;">
+                                    <input :disabled="dao.proposalCreation == 1" v-model="dao.minCreation" type="number" min="1" placeholder="0"
+                                        style="text-align: center;">
+                                    <div class="input_tag">{{ dao.tokenSymbol != '' ? '$' + dao.tokenSymbol : '$Token' }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -222,8 +279,8 @@
                         <p class="desc">Support threshold is the percentage of tokens or that are required to vote “Yes” for
                             a proposal to be approved, calculated based on total tokens that voted.</p>
                         <div class="input">
-                            <input type="number" placeholder="50">
-                            <div class="input_tag">percernt</div>
+                            <input v-model="dao.threshold" type="number" placeholder="50">
+                            <div class="input_tag">%</div>
                         </div>
                     </div>
 
@@ -233,8 +290,8 @@
                             proposal for the vote to be valid. Make sure you set this at a low level that your DAO can meet,
                             so you don't lock your voting process.</p>
                         <div class="input">
-                            <input type="number" placeholder="50">
-                            <div class="input_tag">1 token</div>
+                            <input v-model="dao.minParticipation" type="number" placeholder="50">
+                            <div class="input_tag">{{ dao.tokenSymbol != '' ? '$' + dao.tokenSymbol : '$Token' }}</div>
                         </div>
                     </div>
 
@@ -243,7 +300,7 @@
                         <p class="desc">Minimum duration is the shortest length of time a proposal can be open for voting.
                             You can extend the duration for each proposal but not shorten it.</p>
                         <div class="input">
-                            <input type="number" placeholder="30">
+                            <input v-model="dao.minDuration" type="number" placeholder="30">
                             <div class="input_tag">days</div>
                         </div>
                     </div>
@@ -253,7 +310,8 @@
                         <p class="desc">Allow proposal execution before the vote ends if the requirements are met and the
                             vote outcome cannot be changed by more voters participating.</p>
                         <div class="participate_options">
-                            <div class="option">
+                            <div v-on:click="dao.earlyExecution = true"
+                                :class="dao.earlyExecution ? 'option option_active' : 'option'">
                                 <div class="option_text">
                                     <h6>Yes</h6>
                                 </div>
@@ -262,7 +320,8 @@
                                 </div>
                             </div>
 
-                            <div class="option">
+                            <div v-on:click="dao.earlyExecution = false"
+                                :class="!dao.earlyExecution ? 'option option_active' : 'option'">
                                 <div class="option_text">
                                     <h6>No</h6>
                                 </div>
@@ -270,6 +329,69 @@
                                     <div class="inner_dot"></div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="label" v-show="step == 3">
+                        <p class="title">Support Meta-Transactions</p>
+                        <p class="desc">Allow paying gas fee upfront for dao participant.</p>
+                        <div class="participate_options gasless_options">
+                            <div v-on:click="dao.gasless = true" :class="dao.gasless ? 'option option_active' : 'option'">
+                                <div class="option_text">
+                                    <h6>Yes</h6>
+                                </div>
+                                <div class="option_dot">
+                                    <div class="inner_dot"></div>
+                                </div>
+                            </div>
+
+                            <div v-on:click="dao.gasless = false" :class="!dao.gasless ? 'option option_active' : 'option'">
+                                <div class="option_text">
+                                    <h6>No</h6>
+                                </div>
+                                <div class="option_dot">
+                                    <div class="inner_dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--  -->
+
+                    <div class="label" v-show="step == 4">
+                        <p class="title">Reward type</p>
+                        <p class="desc">Allow proposal execution before the vote ends if the requirements are met and the
+                            vote outcome cannot be changed by more voters participating.</p>
+                        <div class="participate_options">
+                            <div v-on:click="dao.reward = 1"
+                                :class="dao.reward == 1 ? 'option option_active' : 'option'">
+                                <div class="option_text">
+                                    <h6>Non Fungible Token</h6>
+                                </div>
+                                <div class="option_dot">
+                                    <div class="inner_dot"></div>
+                                </div>
+                            </div>
+
+                            <div v-on:click="dao.reward = 0"
+                                :class="dao.reward == 0 ? 'option option_active' : 'option'">
+                                <div class="option_text">
+                                    <h6>None</h6>
+                                </div>
+                                <div class="option_dot">
+                                    <div class="inner_dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="label" v-show="step == 4 && dao.reward == 1">
+                        <p class="title">NFT Image</p>
+                        <p class="desc">This will be your DAO’s NFT reward image</p>
+
+                        <div class="input_file nft_input_file">
+                            <IconImageAdd />
+                            <input v-on:change="pickLogo($event)" type="file" accept="image/*">
                         </div>
                     </div>
 
@@ -285,7 +407,7 @@
                             <IconArrowLeft :color="'var(--white)'" /> Prev
                         </button>
 
-                        <button v-on:click="nextStep()" v-if="step == 3">Deploy your DAO
+                        <button v-on:click="deploy()" v-if="step == 4">Deploy your DAO
                             <IconArrowRight :color="'var(--white)'" />
                         </button>
                         <button v-on:click="nextStep()" v-else>Next
@@ -300,51 +422,164 @@
 
 <script setup>
 import IconTrash from '../icons/IconTrash.vue'
+import IconImageAdd from '../icons/IconImageAdd.vue'
 import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import IconArrowRight from '../icons/IconArrowRight.vue'
 </script>
 
 <script>
+import { mapState } from 'vuex';
+import { deployDao } from '../../scripts/aeternity'
 export default {
     data() {
         return {
+            dao: {
+                name: '',
+                summary: '',
+                logoUri: undefined,
+                subdomain: '',
+                links: [
+                    {
+                        name: '',
+                        link: ''
+                    }
+                ],
+                participation: 0,
+                tokenName: '',
+                tokenSymbol: '',
+                tokenAllocations: [
+                    {
+                        address: this.$store.state.address ? this.$store.state.address : '',
+                        tokens: 10
+                    }
+                ],
+                multisigMembers: [
+                    {
+                        address: this.$store.state.address ? this.$store.state.address : '',
+                        powers: 10
+                    }
+                ],
+                proposalCreation: 0,
+                minCreation: 10,
+                threshold: 50,
+                minParticipation: 1,
+                minDuration: 30,
+                earlyExecution: true,
+                gasless: false,
+                reward: 1,
+                rewardUri: ''
+            },
+            totalSupply: 10,
+            totalPower: 10,
             step: 1,
-            links: [
-                {
-                    name: '',
-                    link: ''
+        }
+    },
+    computed: {
+        ...mapState(['aeSdk'])
+    },
+    watch: {
+        dao: {
+            handler: function (newDao) {
+                this.totalSupply = 0
+                this.totalPower = 0
+                for (let index = 0; index < newDao.tokenAllocations.length; index++) {
+                    const allocation = newDao.tokenAllocations[index];
+                    this.totalSupply += allocation.tokens
                 }
-            ],
-            addresses: [
-                {
-                    address: '',
-                    tokens: ''
+                for (let index = 0; index < newDao.multisigMembers.length; index++) {
+                    const member = newDao.multisigMembers[index];
+                    this.totalPower += member.powers
                 }
-            ]
+            },
+            deep: true
         }
     },
     methods: {
+        deploy: async function () {
+            if (this.dao.name == '') {
+                alert('Enter DAO name')
+                return
+            }
+            if (this.dao.subdomain == '') {
+                alert('Enter DAO subdomain')
+                return
+            }
+            if (this.dao.summary == '') {
+                alert('Enter DAO description')
+                return
+            }
+            for (let index = 0; index < this.dao.links.length; index++) {
+                const link = this.dao.links[index];
+                if (link.name == '' || !link.link.startsWith('http')) {
+                    alert('Enter a valid link name and url')
+                    return
+                }
+            }
+            if (this.dao.participation == 0 && this.dao.tokenName == '') {
+                alert('Enter DAO token name')
+                return
+            }
+            if (this.dao.participation == 0 && this.dao.tokenSymbol == '') {
+                alert('Enter DAO token symbol')
+                return
+            }
+            for (let index = 0; index < this.dao.tokenAllocations.length; index++) {
+                const address = this.dao.tokenAllocations[index];
+                if (address.address == '' || address.tokens == '') {
+                    alert(`Enter a valid link member address and token at ${index + 1}`)
+                    return
+                }
+            }
+            if (this.dao.proposalCreation == 0 && this.dao.minCreation == '') {
+                alert('Enter DAO minimum token for creation')
+                return
+            }
+            if (this.dao.threshold == '') {
+                alert('Enter DAO threshold')
+                return
+            }
+            if (this.dao.minParticipation == '') {
+                alert('Enter DAO minimum token for participation')
+                return
+            }
+            if (this.dao.minDuration == '') {
+                alert('Enter DAO minimum duration for proposals')
+                return
+            }
+
+            if (confirm('Confirm to deploy DAO')) {
+                const result = await deployDao(this.aeSdk, this.dao)
+                console.log(result);
+                this.$router.push(`/app/daos/${result.id}`)
+            }
+        },
         prevStep: function () {
             if (this.step > 1) {
                 this.step--
             }
         },
         nextStep: function () {
-            if (this.step < 3) {
+            if (this.step < 4) {
                 this.step++
             }
         },
         addLink: function () {
-            this.links.push({ name: '', link: '' })
+            this.dao.links.push({ name: '', link: '' })
         },
         removeLink: function (index) {
-            this.links.splice(index, 1)
+            this.dao.links.splice(index, 1)
         },
-        addWallet: function () {
-            this.addresses.push({ address: '', tokens: '' })
+        addAllocation: function () {
+            this.dao.tokenAllocations.push({ address: '', tokens: 0 })
         },
-        removeWallet: function (index) {
-            this.addresses.splice(index, 1)
+        addMember: function () {
+            this.dao.multisigMembers.push({ address: '', powers: 0 })
+        },
+        removeAllocation: function (index) {
+            this.dao.tokenAllocations.splice(index, 1)
+        },
+        removeMember: function (index) {
+            this.dao.multisigMembers.splice(index, 1)
         }
     }
 }
@@ -425,6 +660,12 @@ section {
     font-weight: 600;
 }
 
+.label .title span {
+    font-size: 14px;
+    color: var(--gray-dark);
+    margin-left: 4px;
+}
+
 .label .desc {
     font-size: 14px;
     font-weight: 500;
@@ -440,6 +681,37 @@ section {
     margin-top: 10px;
     display: flex;
     align-items: center;
+    cursor: pointer;
+}
+
+.input_file {
+    width: 80px;
+    height: 80px;
+    margin-top: 10px;
+    border: 2px dashed rgb(228, 231, 235);
+    border-radius: 12px;
+    background-color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.nft_input_file {
+    width: 280px;
+    height: 300px;
+}
+
+.input_file svg {
+    width: 30px;
+    height: 30px;
+}
+
+.input_file input {
+    width: 100%;
+    position: absolute;
+    height: 100%;
+    opacity: 0;
 }
 
 .label .input_tag {
@@ -448,9 +720,9 @@ section {
     min-width: 100px;
     height: 50px;
     display: flex;
-    text-align: center;
+    justify-content: center;
     align-items: center;
-    color: var(--gray-dark);
+    color: var(--black);
     font-weight: 500;
     font-size: 16px;
 }
@@ -541,6 +813,10 @@ section {
     gap: 10px;
 }
 
+.participate_options .option_active {
+    border: 2px solid var(--background);
+}
+
 .option h6 {
     font-size: 16px;
     font-weight: 600;
@@ -563,10 +839,19 @@ section {
     justify-content: center;
 }
 
+.participate_options .option_active .option_dot {
+    border: 2px solid var(--background);
+}
+
+
+.participate_options .option_active .inner_dot {
+    background-color: var(--background-light);
+}
+
 .inner_dot {
     width: 12px;
     height: 12px;
-    background-color: var(--gray-dark);
+    background-color: var(--gray);
     border-radius: 10px;
 }
 
@@ -590,6 +875,12 @@ section {
     border-radius: 12px;
     padding: 16px;
     margin-top: 16px;
+}
+
+.gasless_options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .address_grid {
