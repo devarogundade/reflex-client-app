@@ -549,8 +549,7 @@ export default {
 
             if (confirm('Confirm to deploy DAO')) {
                 const result = await deployDao(this.aeSdk, this.dao)
-                console.log(result);
-                this.$router.push(`/app/daos/${result.id}`)
+                this.$router.push(`/app/daos/${result.decodedEvents[0].args[1]}`)
             }
         },
         prevStep: function () {

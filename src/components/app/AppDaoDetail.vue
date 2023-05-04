@@ -1,18 +1,18 @@
 <template>
-    <section>
+    <ProgressView v-if="loading" />
+    <section v-else>
         <div class="app_width">
             <div class="detail_container">
-                <div class="detail_head">
+                <div class="detail_head" v-if="dao.metadata">
                     <div class="detail_head_text">
-                        <h1>YatsuDAO_Ryufukuji</h1>
-                        <p class="domain">yatsudao-rfj.dao.eth</p>
+                        <h1>{{ dao.metadata.name }}</h1>
+                        <p class="domain">{{ dao.metadata.subdomain }}.rf.chain</p>
                         <div class="link">
                             <p>{{ `https://reflex-protocol.netlify.app/app/daos/${$route.params.id}` }}</p>
                             <IconCopy :color="'var(--background)'" />
                         </div>
                         <p class="detail_head_text_desc">
-                            This is a DAO to discuss and implement management practices to turn abandoned paddy fields in
-                            Ryufukuji, Inzai, Chiba, into valuable and attractive green-infrastructure.
+                            {{ dao.metadata.summary }}
                         </p>
                     </div>
                     <div class="detail_head_image">
@@ -30,9 +30,10 @@
                             <IconBoxTick :color="'var(--background)'" />
                             <p>aeternity</p>
                         </div>
-                        <div class="option">
+                        <div class="option" v-if="dao.membership">
                             <IconPeople :color="'var(--background)'" />
-                            <p>Token-Based</p>
+                            <p v-if="dao.membership.participation == 0">Token-Based</p>
+                            <p v-if="dao.membership.participation == 1">Wallet-Based</p>
                         </div>
                     </div>
 
@@ -44,29 +45,29 @@
 
             <div class="dao_container">
                 <div class="proposal_container">
-                    <div class="proposal_created">
+                    <div class="proposal_created" v-if="dao.proposals">
                         <div class="proposal_created_text">
                             <IconBox />
-                            <h3>3 <span>Proposals created</span></h3>
+                            <h3>{{ dao.proposals.size }} <span>Proposals created</span></h3>
                         </div>
-                        <RouterLink to="/app/daos/1/governance/new-proposal">
+                        <RouterLink :to="`/app/daos/${$route.params.id}/governance/create`">
                             <button>New proposal</button>
                         </RouterLink>
                     </div>
 
-                    <div class="proposals">
-                        <div class="proposal" v-for="i in 2" :key="i">
+                    <div class="proposals" v-if="dao.proposals && dao.proposals.size > 0">
+                        <div class="proposal" v-for="proposalId, i in [...dao.proposals.keys()]" :key="i">
                             <div class="proposal_info">
                                 <span>Active</span>
                                 <div class="proposal_info_time">
                                     <IconClock />
-                                    <p>7 days left</p>
+                                    <p>{{ dao.proposals.get(proposalId).endedOn }}</p>
                                 </div>
                             </div>
                             <div class="proposal_head">
-                                <h3>投票時間の最短値の変更</h3>
-                                <p class="desc">7日から1時間に変更したい</p>
-                                <p class="published">Published by <a href="">0x207...3488</a></p>
+                                <h3>{{ dao.proposals.get(proposalId).title }}</h3>
+                                <p class="desc">{{ dao.proposals.get(proposalId).summary }}</p>
+                                <p class="published">Published by <a href="">{{ dao.proposals.get(proposalId).owner }}</a></p>
                             </div>
                             <div class="proposal_vote">
                                 <div class="wining">
@@ -83,6 +84,16 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="create_proposal" v-else>
+                        <img src="/images/token-transfer.svg" alt="">
+                        <h3>No proposal has been created</h3>
+                        <p>Ready to distribute tokens or send funds? Initiate a token transfer here. For ideas on how to
+                            distribute your community's token, read our guide on token distribution.</p>
+                        <RouterLink :to="`/app/daos/${$route.params.id}/governance/create`">
+                            <button>Create first proposal</button>
+                        </RouterLink>
+                    </div>
                 </div>
 
                 <div class="proposal2_container">
@@ -92,23 +103,34 @@
                         <p>Ready to distribute tokens or send funds? Initiate a token transfer here. For ideas on how to
                             distribute your community's token, read our guide on token distribution.</p>
                         <button
-                            v-on:click="createOrChangeAllowance(aeSdk, 'ct_2pT2mj7s1NnUkWoY4trcisk2MWnq8zj3qsUatemUwXKkZ42qVe', 'ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688', 10000)">Initiate
+                            v-on:click="createOrChangeAllowance(aeSdk, 'ct_2JkbE3piVPeZ22A1uZjWPqEcjG1WsqvEBUdrZPSWapEE86CEzm', 'ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688', 10000)">Initiate
                             transfer</button>
                     </div>
 
-                    <div class="member_container">
+                    <div class="member_container" v-if="dao.membership.participation > 0">
                         <div class="members_info">
                             <IconPeople />
                             <button>Add members</button>
                         </div>
 
                         <div class="members_count">
-                            <h3>1 Members</h3>
-                            <p>Token-Based</p>
+                            <h3>{{ dao.membership.multisigMembers.size }} Members</h3>
+                            <p>Wallet-Based</p>
+                        </div>
+                    </div>
+                    <div class="member_container" v-else-if="daoMembers">
+                        <div class="members_info">
+                            <IconPeople />
+                            <button>Add members</button>
+                        </div>
+
+                        <div class="members_count">
+                            <h3>{{ daoMembers.size }} Members</h3>
+                            <p>Wallet-Based</p>
                         </div>
                     </div>
 
-                    <div class="members">
+                    <div class="members" v-if="dao.membership.participation > 0">
                         <div class="member">
                             <div class="member_info">
                                 <img src="" alt="">
@@ -117,6 +139,20 @@
                             <a href="">
                                 <div class="member_link">
                                     <p>20 YT (100%)</p>
+                                    <IconOut />
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="members" v-else-if="daoMembers">
+                        <div class="member" v-for="memberAddress, i in [...daoMembers.keys()]" :key="i">
+                            <div class="member_info">
+                                <img src="" alt="">
+                                <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45, memberAddress.length) }}</p>
+                            </div>
+                            <a :href="`${memberAddress}`">
+                                <div class="member_link">
+                                    <p>{{ $fromWei(daoMembers.get(memberAddress)) }} YT (100%)</p>
                                     <IconOut />
                                 </div>
                             </a>
@@ -136,17 +172,38 @@ import IconBox from '../icons/IconBox.vue'
 import IconBoxTick from '../icons/IconBoxTick.vue'
 import IconPeople from '../icons/IconPeople.vue';
 import IconOut from '../icons/IconOut.vue'
-import {
-    createOrChangeAllowance,
-} from '../../scripts/aeternity'
+import ProgressView from './ProgressView.vue';
+import { daoState, tokenBalances } from '../../scripts/aeternity'
 </script>
 
 <script>
 import { mapState } from 'vuex';
 export default {
     computed: {
-        ...mapState(['aeSdk'])
+        ...mapState(["aeSdk"])
     },
+    data() {
+        return {
+            loading: true,
+            dao: null,
+            daoMembers: null
+        };
+    },
+    methods: {
+        getDao: async function () {
+            const result = await daoState(this.aeSdk, this.$route.params.id.replace('ak', 'ct'));
+            this.dao = result.decodedResult
+            this.loading = false
+
+            if (this.dao.membership.participation == 0) {
+                const result = await tokenBalances(this.aeSdk, this.dao.daoToken)
+                this.daoMembers = result.decodedResult
+            }
+        }
+    },
+    mounted() {
+        this.getDao();
+    }
 }
 </script>
 
@@ -265,6 +322,51 @@ section {
     border-radius: 12px;
     border: rgb(228, 231, 235) 1px solid;
 }
+
+.create_proposal {
+    padding: 50px;
+    background-color: var(--white);
+    border-radius: 12px;
+    border: rgb(228, 231, 235) 1px solid;
+    margin-top: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.create_proposal img {
+    height: 260px;
+    transform: scale(1.5, 1.5);
+}
+
+.create_proposal h3 {
+    font-size: 24px;
+    margin-top: 60px;
+}
+
+.create_proposal p {
+    font-size: 16px;
+    color: var(--gray-dark);
+    margin-top: 10px;
+}
+
+.create_proposal button {
+    background-color: var(--background);
+    color: var(--white);
+    border-radius: 12px;
+    height: 45px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 60px;
+}
+
 
 .proposal {
     padding: 20px;

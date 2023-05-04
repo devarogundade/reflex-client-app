@@ -30,7 +30,7 @@
                 <div class="header_actions">
                     <div class="header_action connect_wallet" v-on:click="disconnect()" v-if="$store.state.address">
                         <IconWallet :color="'var(--background)'" />
-                        <p>{{ $store.state.address }}</p>
+                        <p>{{ $store.state.address.substring(0, 10) + '••' + $store.state.address.substring(45, $store.state.address.length) }}</p>
                     </div>
                     <div class="header_action connect_wallet" v-else-if="!walletConnected && !walletConnecting"
                         v-on:click="connect()">
@@ -40,12 +40,11 @@
                     <div class="header_action connect_wallet" v-else>
                         <img src="/images/loading_logo.svg">
                     </div>
-                    <a href="" target="_blank">
+                    <RouterLink to="/app/account" v-if="$store.state.address">
                         <div class="header_action">
-                            <IconCode :color="'var(--white)'" />
-                            <p>Developers</p>
+                            <p>My Account</p>
                         </div>
-                    </a>
+                    </RouterLink>
                 </div>
             </header>
         </div>
@@ -53,7 +52,6 @@
 </template>
 
 <script setup>
-import IconCode from '../icons/IconCode.vue';
 import IconWallet from '../icons/IconWallet.vue';
 </script>
 
@@ -138,7 +136,7 @@ section {
     width: 100%;
     backdrop-filter: blur(12px);
     z-index: 10;
-    background-color: #de3f6c7a;
+    background-color: #de3f6c;
 }
 
 header {

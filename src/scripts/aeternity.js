@@ -1,21 +1,56 @@
 import { BigNumber } from 'bignumber.js'
-import daotoken from '../configs/daotoken';
-import daofactoryconfig from '../configs/daofactoryconfig';
-import daoconfig from '../configs/daoconfig';
+import daotoken from '../acis/daotoken';
+import daoreward from '../acis/daoreward'
+import daofactoryconfig from '../acis/daofactoryconfig';
+import daoconfig from '../acis/daoconfig';
+import Converter from './Converter'
 
 let factoryContract = null
 
-export const dao = async (sdk, contractAddress) => {
-    console.log(contractAddress);
-    let contract = await sdk.initializeContract({
+
+// DAO
+
+export const daoState = async (sdk, contractAddress) => {
+    const contract = await sdk.initializeContract({
         aci: daoconfig.aci,
         address: contractAddress
     })
 
-    return await contract.daoToken()
+    return await contract.get_state()
 }
 
-export const ownersDao = async (sdk, userAddress) => {
+export const createProposal = async (sdk, contractAddress, proposal) => {
+    const contract = await sdk.initializeContract({
+        aci: daoconfig.aci,
+        address: contractAddress
+    })
+
+    return await contract.create_proposal(
+        proposal.title,
+        proposal.summary,
+        proposal.startedOn,
+        proposal.endedOn,
+        false // gasless
+    )
+}
+
+export const voteProposal = async (sdk, contractAddress, proposalId, cast, amount) => {
+    const contract = await sdk.initializeContract({
+        aci: daoconfig.aci,
+        address: contractAddress
+    })
+
+    return await contract.vote_proposal(
+        proposalId,
+        amount,
+        cast,
+        false // gasless
+    )
+}
+
+// DAO FACTORY
+
+export const factoryState = async (sdk) => {
     let contract = null
 
     if (!factoryContract) {
@@ -27,22 +62,7 @@ export const ownersDao = async (sdk, userAddress) => {
 
     contract = factoryContract
 
-    return await contract.get_owners_dao(userAddress)
-}
-
-export const daos = async (sdk) => {
-    let contract = null
-
-    if (!factoryContract) {
-        factoryContract = await sdk.initializeContract({
-            aci: daofactoryconfig.aci,
-            address: daofactoryconfig.contractAddress
-        })
-    }
-
-    contract = factoryContract
-
-    return await contract.get_daos()
+    return await contract.get_state()
 }
 
 export const deployDao = async (sdk, dao) => {
@@ -59,7 +79,7 @@ export const deployDao = async (sdk, dao) => {
 
     const tokenAllocations = new Map()
     dao.tokenAllocations.forEach(allocation => {
-        tokenAllocations.set(allocation.address, allocation.tokens)
+        tokenAllocations.set(allocation.address, Converter.toWei(allocation.tokens))
     });
 
     const multisigMembers = new Map()
@@ -68,51 +88,84 @@ export const deployDao = async (sdk, dao) => {
     });
 
     return await contract.create_dao(
-        dao.name, 
-        dao.summary, 
-        dao.subdomain, 
-        JSON.stringify(dao.links), 
-        dao.logoUri, 
-        dao.tokenName, 
-        dao.tokenSymbol, 
-        dao.proposalCreation, 
-        dao.participation, 
-        dao.minCreation, 
-        dao.threshold, 
-        dao.minParticipation, 
-        multisigMembers, 
-        dao.minDuration, 
-        dao.earlyExecution, 
-        dao.metaTransaction, 
-        dao.reward, 
-        tokenAllocations
+        dao.name,
+        dao.summary,
+        dao.subdomain,
+        JSON.stringify(dao.links),
+        dao.logoUri,
+        dao.tokenName,
+        dao.tokenSymbol,
+        dao.proposalCreation,
+        dao.participation,
+        dao.minCreation,
+        dao.threshold,
+        dao.minParticipation,
+        multisigMembers,
+        dao.minDuration,
+        dao.earlyExecution,
+        dao.metaTransaction,
+        dao.reward,
+        tokenAllocations, {
+        omitUnknown: true
+    }
     )
 }
 
-export const getTokenBalance = async (sdk, tokenAddress, userAddress) => {
-    const tokenContract = await sdk.initializeContract({ sourceCode: daotoken.contractSource, address: tokenAddress })
+// DAO TOKEN
 
-    const { decodedResult } = await tokenContract.balance(userAddress);
+export const tokenBalances = async (sdk, tokenAddress) => {
+    const tokenContract = await sdk.initializeContract({
+        aci: daotoken.aci,
+        address: tokenAddress
+    })
 
-    return decodedResult
+    return await tokenContract.balances()
 }
 
-export const createOrChangeAllowance = async (sdk, tokenAddress, spender, amount) => {
-    const tokenContract = await sdk.initializeContract({ sourceCode: daotoken.contractSource, address: tokenAddress })
+export const getTokenBalance = async (sdk, tokenAddress, userAddress) => {
+    const tokenContract = await sdk.initializeContract({
+        sourceCode: daotoken.aci,
+        address: tokenAddress
+    })
 
-    const { decodedResult } = await tokenContract.allowance(sdk.address, spender);
+    return await tokenContract.balance(userAddress)
+}
+
+export const approve = async (sdk, tokenAddress, spender, amount) => {
+    const tokenContract = await sdk.initializeContract({
+        sourceCode: daotoken.aci,
+        address: tokenAddress
+    })
+
+    const { decodedResult } = await tokenContract.allowance(sdk.address, spender)
 
     const allowanceAmount = decodedResult !== undefined
         ? new BigNumber(decodedResult).multipliedBy(-1).plus(amount).toNumber()
         : amount;
 
-    let tx
-
     if (decodedResult !== undefined) {
-        tx = await tokenContract.change_allowance(spender, allowanceAmount);
+        return await tokenContract.change_allowance(spender, allowanceAmount)
     } else {
-        tx = await tokenContract.create_allowance(spender, allowanceAmount);
+        return await tokenContract.create_allowance(spender, allowanceAmount)
     }
+}
 
-    return tx
-};
+export const allowance = async (sdk, tokenAddress, userAddress, spender) => {
+    const tokenContract = await sdk.initializeContract({
+        sourceCode: daotoken.aci,
+        address: tokenAddress
+    })
+
+    return await tokenContract.allowance(userAddress, spender)
+}
+
+// DAO REWARD
+
+export const rewardState = async (sdk, rewardAddress) => {
+    const tokenContract = await sdk.initializeContract({
+        aci: daoreward.aci,
+        address: rewardAddress
+    })
+
+    return await tokenContract.get_state()
+}

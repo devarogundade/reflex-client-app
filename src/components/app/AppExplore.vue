@@ -37,7 +37,7 @@ import IconPeople from '../icons/IconPeople.vue';
 
 <script>
 import { mapState } from 'vuex';
-import { daos } from '../../scripts/aeternity';
+import { factoryState } from '../../scripts/aeternity';
 export default {
     computed: {
         ...mapState(['aeSdk']),
@@ -48,8 +48,8 @@ export default {
         }
     },
     async mounted() {
-        const result = await daos(this.aeSdk)
-        this.allDaos = result.decodedResult
+        const result = await factoryState(this.aeSdk)
+        this.allDaos = result.decodedResult.daos
     }
 }
 </script>

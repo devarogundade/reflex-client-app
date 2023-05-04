@@ -5,32 +5,27 @@
                 <RouterLink to="/app">
                     <img src="/images/logo.svg" alt="logo" class="header_logo">
                 </RouterLink>
-                <div class="header_menu" v-if="$route.name == 'app-daos-dao'">
-                    <RouterLink to="">
-                        <div class="header_menuitem header_menuactive">
+                <div class="header_menu">
+                    <RouterLink :to="`/app/daos/${$route.params.id}`">
+                        <div :class="$route.name == 'app-daos-dao' ? 'header_menuitem header_menuactive' : 'header_menuitem'">
                             <p>Dashboard</p>
                         </div>
                     </RouterLink>
-                    <RouterLink to="">
-                        <div class="header_menuitem">
+                    <RouterLink :to="`/app/daos/${$route.params.id}/governance`">
+                        <div :class="$route.name.startsWith('app-daos-dao-governance') ? 'header_menuitem header_menuactive' : 'header_menuitem'">
                             <p>Governance</p>
                         </div>
                     </RouterLink>
-                    <a href="" target="_blank">
-                        <div class="header_menuitem">
-                            <p>Finance</p>
+                    <RouterLink :to="`/app/daos/${$route.params.id}/members`">
+                        <div :class="$route.name == 'app-daos-dao-members' ? 'header_menuitem header_menuactive' : 'header_menuitem'">
+                            <p>Members</p>
                         </div>
-                    </a>
-                    <a href="https://dao-fi-fusion-code-challenge.devpost.com/" target="_blank">
-                        <div class="header_menuitem">
-                            <p>Community</p>
-                        </div>
-                    </a>
+                    </RouterLink>
                 </div>
                 <div class="header_actions">
                     <div class="header_action connect_wallet" v-on:click="disconnect()" v-if="$store.state.address">
                         <IconWallet :color="'var(--background)'" />
-                        <p>{{ $store.state.address }}</p>
+                        <p>{{ $store.state.address.substring(0, 10) + '••' + $store.state.address.substring(45, $store.state.address.length) }}</p>
                     </div>
                     <div class="header_action connect_wallet" v-else-if="!walletConnected && !walletConnecting"
                         v-on:click="connect()">
@@ -40,6 +35,11 @@
                     <div class="header_action connect_wallet" v-else>
                         <img src="/images/loading_logo.svg">
                     </div>
+                    <RouterLink to="/app/account" v-if="$store.state.address">
+                        <div class="header_action">
+                            <p>My Account</p>
+                        </div>
+                    </RouterLink>
                 </div>
             </header>
         </div>
@@ -147,7 +147,7 @@ header {
     display: flex;
     align-items: center;
     gap: 20px;
-    width: 50%;
+    width: 60%;
 }
 
 .header_menuitem {
@@ -155,6 +155,7 @@ header {
     font-weight: normal;
     font-size: 16px;
     line-height: 24px;
+    font-weight: 500;
 }
 
 .header_menuactive {
