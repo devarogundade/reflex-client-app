@@ -3,30 +3,8 @@
         <div class="app_width">
             <header>
                 <RouterLink to="/app">
-                    <img src="/images/logo.svg" alt="logo" class="header_logo">
+                    <img src="/images/logo.png" alt="logo" class="header_logo">
                 </RouterLink>
-                <div class="header_menu" v-if="$route.name == 'app-daos-dao'">
-                    <RouterLink to="">
-                        <div class="header_menuitem header_menuactive">
-                            <p>Dashboard</p>
-                        </div>
-                    </RouterLink>
-                    <RouterLink to="">
-                        <div class="header_menuitem">
-                            <p>Governance</p>
-                        </div>
-                    </RouterLink>
-                    <a href="" target="_blank">
-                        <div class="header_menuitem">
-                            <p>Finance</p>
-                        </div>
-                    </a>
-                    <a href="https://dao-fi-fusion-code-challenge.devpost.com/" target="_blank">
-                        <div class="header_menuitem">
-                            <p>Community</p>
-                        </div>
-                    </a>
-                </div>
                 <div class="header_actions">
                     <div class="header_action connect_wallet" v-on:click="disconnect()" v-if="$store.state.address">
                         <IconWallet :color="'var(--background)'" />
@@ -149,25 +127,6 @@ header {
 
 .header_logo {
     width: 120px;
-}
-
-.header_menu {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    width: 50%;
-}
-
-.header_menuitem {
-    color: var(--white);
-    font-size: 16px;
-    line-height: 24px;
-}
-
-.header_menuactive {
-    padding: 10px 16px;
-    background-color: var(--background-light);
-    border-radius: 12px;
 }
 
 .header_actions {

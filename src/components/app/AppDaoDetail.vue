@@ -6,9 +6,9 @@
                 <div class="detail_head" v-if="dao.metadata">
                     <div class="detail_head_text">
                         <h1>{{ dao.metadata.name }}</h1>
-                        <p class="domain">{{ dao.metadata.subdomain }}.rf.chain</p>
+                        <p class="domain">{{ dao.metadata.subdomain }}.dao.chain</p>
                         <div class="link">
-                            <p>{{ `https://reflex-protocol.netlify.app/app/daos/${$route.params.id}` }}</p>
+                            <p>{{ `reflex-protocol.netlify.app/app/daos/${$route.params.id}` }}</p>
                             <IconCopy :color="'var(--background)'" />
                         </div>
                         <p class="detail_head_text_desc">
@@ -56,33 +56,65 @@
                     </div>
 
                     <div class="proposals" v-if="dao.proposals && dao.proposals.size > 0">
-                        <div class="proposal" v-for="proposalId, i in [...dao.proposals.keys()]" :key="i">
-                            <div class="proposal_info">
-                                <span>Active</span>
-                                <div class="proposal_info_time">
-                                    <IconClock />
-                                    <p>{{ dao.proposals.get(proposalId).endedOn }}</p>
+                        <RouterLink v-for="proposalId, i in [...dao.proposals.keys()]" :key="i"
+                            :to="`/app/daos/${$route.params.id.replace('ak', 'ct')}/governance/${proposalId}`">
+                            <div class="proposal">
+                                <div class="proposal_info">
+                                    <span style="background-color: red;"
+                                        v-if="getProposalState(dao.proposals.get(proposalId)) == 'Ended'">Ended</span>
+                                    <span style="background-color: green;"
+                                        v-else-if="getProposalState(dao.proposals.get(proposalId)) == 'Upcoming'">Upcoming</span>
+                                    <span v-else>{{ getProposalState(dao.proposals.get(proposalId)) }}</span>
+                                    <div class="proposal_info_time">
+                                        <IconClock />
+                                        <p>
+                                            {{
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).month + ',' +
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).date + ' ' +
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).hour + ':' +
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).min
+                                            }} —
+                                            {{
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).month + ',' +
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).date + ' ' +
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).hour + ':' +
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).min
+                                            }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="proposal_head">
+                                    <h3>{{ dao.proposals.get(proposalId).title }}</h3>
+                                    <p class="desc">{{ dao.proposals.get(proposalId).summary }}</p>
+                                    <p class="published">Published by <a
+                                            :href="`https://explorer.testnet.aeternity.io/account/${dao.proposals.get(proposalId).owner}`">{{
+                                                dao.proposals.get(proposalId).owner.substring(0, 10) + '...' +
+                                                dao.proposals.get(proposalId).owner.substring(45, 53)
+                                            }}
+                                        </a> on {{
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).month + ',' +
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).date + ' ' +
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).hour + ':' +
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).min
+                                        }}</p>
+                                </div>
+                                <div class="proposal_vote">
+                                    <div class="wining">
+                                        <p>Votes ({{ dao.proposals.get(proposalId).votes.size }})</p>
+                                        <p>{{ $fromWei(sumVotes(dao.proposals.get(proposalId))) }} ${{
+                                            daoToken.meta_info.symbol }}</p>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress_bar" :style="`width: ${(dao.proposals.get(proposalId).approves.length
+                                            / dao.proposals.get(proposalId).votes.size) * 100}%;`"></div>
+                                    </div>
+                                    <div class="status">
+                                        <p>Ongoing</p>
+                                        <p>100%</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="proposal_head">
-                                <h3>{{ dao.proposals.get(proposalId).title }}</h3>
-                                <p class="desc">{{ dao.proposals.get(proposalId).summary }}</p>
-                                <p class="published">Published by <a href="">{{ dao.proposals.get(proposalId).owner }}</a></p>
-                            </div>
-                            <div class="proposal_vote">
-                                <div class="wining">
-                                    <p>Wining option</p>
-                                    <p>20 YT</p>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress_bar"></div>
-                                </div>
-                                <div class="status">
-                                    <p>Yes</p>
-                                    <p>100%</p>
-                                </div>
-                            </div>
-                        </div>
+                        </RouterLink>
                     </div>
 
                     <div class="create_proposal" v-else>
@@ -97,20 +129,31 @@
                 </div>
 
                 <div class="proposal2_container">
-                    <div class="token_container">
+                    <div class="token_container" v-if="dao.treasure.history.length == 0">
                         <img src="/images/token-transfer.svg" alt="">
-                        <h3>Initiate a token transfer</h3>
-                        <p>Ready to distribute tokens or send funds? Initiate a token transfer here. For ideas on how to
-                            distribute your community's token, read our guide on token distribution.</p>
-                        <button
-                            v-on:click="createOrChangeAllowance(aeSdk, 'ct_2JkbE3piVPeZ22A1uZjWPqEcjG1WsqvEBUdrZPSWapEE86CEzm', 'ak_2iBPH7HUz3cSDVEUWiHg76MZJ6tZooVNBmmxcgVK6VV8KAE688', 10000)">Initiate
-                            transfer</button>
+                        <h3>Make your first deposit</h3>
+                        <p>Begin by making your first treasury deposit. Learn more about managing a DAO treasury in this
+                            guide.</p>
+                        <RouterLink :to="`/app/daos/${$route.params.id}/treasure`">
+                            <button>Go to treasure</button>
+                        </RouterLink>
+                    </div>
+                    <div class="token_container" v-else>
+                        <div class="token_balance">
+                            <h3>{{ $fromWei(dao.treasure.balance) }} Æ <span>Balance</span></h3>
+                            <h3>{{ $fromWei(dao.treasure.locked) }} Æ <span>Locked</span></h3>
+                        </div>
+                        <RouterLink :to="`/app/daos/${$route.params.id}/treasure`">
+                            <button>Go to treasure</button>
+                        </RouterLink>
                     </div>
 
                     <div class="member_container" v-if="dao.membership.participation > 0">
                         <div class="members_info">
                             <IconPeople />
-                            <button>Add members</button>
+                            <RouterLink :to="`/app/daos/${$route.params.id}/members/add`">
+                                <button>Add members</button>
+                            </RouterLink>
                         </div>
 
                         <div class="members_count">
@@ -118,41 +161,48 @@
                             <p>Wallet-Based</p>
                         </div>
                     </div>
-                    <div class="member_container" v-else-if="daoMembers">
+                    <div class="member_container">
                         <div class="members_info">
                             <IconPeople />
-                            <button>Add members</button>
+                            <RouterLink :to="`/app/daos/${$route.params.id}/members/add`">
+                                <button>Add members</button>
+                            </RouterLink>
                         </div>
 
                         <div class="members_count">
-                            <h3>{{ daoMembers.size }} Members</h3>
-                            <p>Wallet-Based</p>
+                            <h3>{{ daoToken.balances.size }} Members</h3>
+                            <p>Token-Based -> {{ daoToken.meta_info.name }}</p>
                         </div>
                     </div>
 
                     <div class="members" v-if="dao.membership.participation > 0">
-                        <div class="member">
+                        <div class="member" v-for="memberAddress, i in [...dao.membership.multisigMembers.keys()]" :key="i">
                             <div class="member_info">
                                 <img src="" alt="">
-                                <p>Ox207...3488</p>
+                                <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45,
+                                    memberAddress.length) }}
+                                    {{ $store.state.address == memberAddress ? '(You)' : '' }}
+                                </p>
                             </div>
-                            <a href="">
+                            <a :href="`${memberAddress}`">
                                 <div class="member_link">
-                                    <p>20 YT (100%)</p>
+                                    <p>{{ dao.membership.multisigMembers.get(memberAddress) }} Power (100%)</p>
                                     <IconOut />
                                 </div>
                             </a>
                         </div>
                     </div>
-                    <div class="members" v-else-if="daoMembers">
-                        <div class="member" v-for="memberAddress, i in [...daoMembers.keys()]" :key="i">
+                    <div class="members" v-else-if="daoToken">
+                        <div class="member" v-for="memberAddress, i in [...daoToken.balances.keys()]" :key="i">
                             <div class="member_info">
                                 <img src="" alt="">
-                                <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45, memberAddress.length) }}</p>
+                                <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45, 53) }}
+                                    {{ $store.state.address == memberAddress ? '(You)' : '' }}
+                                </p>
                             </div>
-                            <a :href="`${memberAddress}`">
+                            <a :href="`https://explorer.testnet.aeternity.io/account/${memberAddress}`" target="_blank">
                                 <div class="member_link">
-                                    <p>{{ $fromWei(daoMembers.get(memberAddress)) }} YT (100%)</p>
+                                    <p>{{ $fromWei(daoToken.balances.get(memberAddress)) }} YT (100%)</p>
                                     <IconOut />
                                 </div>
                             </a>
@@ -173,7 +223,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue'
 import IconPeople from '../icons/IconPeople.vue';
 import IconOut from '../icons/IconOut.vue'
 import ProgressView from './ProgressView.vue';
-import { daoState, tokenBalances } from '../../scripts/aeternity'
+import { daoState, tokenState } from '../../scripts/aeternity'
 </script>
 
 <script>
@@ -186,19 +236,36 @@ export default {
         return {
             loading: true,
             dao: null,
-            daoMembers: null
+            daoToken: null
         };
     },
     methods: {
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id.replace('ak', 'ct'));
             this.dao = result.decodedResult
-            this.loading = false
 
             if (this.dao.membership.participation == 0) {
-                const result = await tokenBalances(this.aeSdk, this.dao.daoToken)
-                this.daoMembers = result.decodedResult
+                const result = await tokenState(this.aeSdk, this.dao.daoToken)
+                this.daoToken = result.decodedResult
             }
+
+            this.loading = false
+        },
+        sumVotes: function (proposal) {
+            let sum = 0
+            let keys = [...proposal.votes.keys()]
+            for (let index = 0; index < keys.length; index++) {
+                sum += Number(proposal.votes.get(keys[index]));
+            }
+            return sum
+        },
+        getProposalState: function (proposal) {
+            const now = new Date().getTime()
+            if (proposal.executed) return "Executed"
+            if (now > proposal.startedOn && now < proposal.endedOn) return "On-going"
+            if (now < proposal.startedOn) return "Upcoming"
+            if (now > proposal.endedOn) return "Ended"
+            return ""
         }
     },
     mounted() {
@@ -374,6 +441,7 @@ section {
     border-radius: 12px;
     border: rgb(228, 231, 235) 1px solid;
     margin-top: 16px;
+    color: var(--black);
 }
 
 .proposal_created_text {
@@ -504,6 +572,7 @@ section {
     background-color: var(--background);
     width: 200px;
     border-radius: 12px;
+    width: 1%;
 }
 
 .status {
@@ -539,6 +608,24 @@ section {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.token_balance {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.token_balance h3 {
+    margin: 0 !important;
+    font-size: 30px;
+    font-weight: 600;
+}
+
+.token_balance span {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--gray-dark);
 }
 
 .token_container img {

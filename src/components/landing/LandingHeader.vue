@@ -3,7 +3,7 @@
         <div class="app_width">
             <header>
                 <RouterLink to="/">
-                    <img src="/images/logo.svg" alt="logo" class="header_logo">
+                    <img src="/images/logo.png" alt="logo" class="header_logo">
                 </RouterLink>
                 <div class="header_menu">
                     <RouterLink to="">
@@ -78,13 +78,13 @@ header {
     display: flex;
     align-items: center;
     gap: 20px;
-    width: 50%;
 }
 
 .header_menuitem {
     color: var(--white);
     font-size: 16px;
     line-height: 24px;
+    padding: 10px 16px;
 }
 
 .header_actions {

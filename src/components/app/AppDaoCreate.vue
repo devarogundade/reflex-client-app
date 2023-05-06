@@ -55,7 +55,7 @@
                             character count should be under 128.</p>
                         <div class="input">
                             <input v-model="dao.subdomain" type="text" placeholder="Type your DAO's name...">
-                            <div class="input_tag">.rf.chain</div>
+                            <div class="input_tag">.dao.chain</div>
                         </div>
                         <p class="count">0/128</p>
                     </div>
@@ -549,7 +549,7 @@ export default {
 
             if (confirm('Confirm to deploy DAO')) {
                 const result = await deployDao(this.aeSdk, this.dao)
-                this.$router.push(`/app/daos/${result.decodedEvents[0].args[1]}`)
+                this.$router.push(`/app/daos/${result.decodedEvents[0].args[1].replace('ak', 'ct')}`)
             }
         },
         prevStep: function () {

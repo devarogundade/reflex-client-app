@@ -2,74 +2,51 @@
     <ProgressView v-if="loading" />
     <section v-else>
         <div class="app_width">
-            <div class="proposal_created" v-if="dao.proposals">
+            <div class="proposal_created">
                 <div class="proposal_created_text">
                     <IconBox />
-                    <h3>{{ dao.proposals.size }} <span>Proposals created</span></h3>
+                    <h3>{{ $fromWei(dao.treasure.balance) }} Æ <span>Balance</span></h3>
+                    <h3>{{ $fromWei(dao.treasure.locked) }} Æ <span>Locked</span></h3>
                 </div>
-                <RouterLink :to="`/app/daos/${$route.params.id}/governance/create`">
-                    <button>New proposal</button>
+                <RouterLink :to="`/app/daos/${$route.params.id}/treasure/fund`">
+                    <button>Add funds</button>
                 </RouterLink>
             </div>
 
             <div class="dao_form">
-
-                <div class="proposals form" v-if="dao.proposals && dao.proposals.size > 0">
-                    <RouterLink v-for="proposalId, i in [...dao.proposals.keys()]" :key="i"
-                        :to="`/app/daos/${$route.params.id.replace('ak', 'ct')}/governance/${proposalId}`">
-                        <div class="proposal">
+                <div class="proposals form" v-if="dao.treasure.history.length > 0">
+                    <div class="proposal" v-for="trx, i in dao.treasure.history" :key="i">
                             <div class="proposal_info">
-                                <span>Active</span>
+                                <span>Add funds</span>
                                 <div class="proposal_info_time">
                                     <IconClock />
-                                    <p>
-                                        {{
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).month + ',' +
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).date + ' ' +
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).hour + ':' +
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).min
-                                        }} —
-                                        {{
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).month + ',' +
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).date + ' ' +
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).hour + ':' +
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).min
+                                    <p> 
+                                        {{ 
+                                        $toDate(Number(trx.timestamp)).month + ',' +
+                                        $toDate(Number(trx.timestamp)).date + ' ' +
+                                        $toDate(Number(trx.timestamp)).hour + ':' +
+                                        $toDate(Number(trx.timestamp)).min
                                         }}
                                     </p>
                                 </div>
                             </div>
                             <div class="proposal_head">
-                                <h3>{{ dao.proposals.get(proposalId).title }}</h3>
-                                <p class="desc">{{ dao.proposals.get(proposalId).summary }}</p>
-                                <p class="published">Published by <a href="">{{
-                                    dao.proposals.get(proposalId).owner.substring(0, 10) + '...' +
-                                    dao.proposals.get(proposalId).owner.substring(45, 53)
+                                <p class="desc">{{ trx.summary }}</p>
+                                <p class="published">By <a href="">{{ 
+                                    dao.owner.substring(0, 10) + '...' +
+                                    dao.owner.substring(45, 53)
                                 }}</a></p>
                             </div>
-                            <div class="proposal_vote">
-                                <div class="wining">
-                                    <p>Votes</p>
-                                    <p>{{ sumVotes(dao.proposals.get(proposalId).votes) }} YT</p>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress_bar"></div>
-                                </div>
-                                <div class="status">
-                                    <p>Ongoing</p>
-                                    <p>100%</p>
-                                </div>
-                            </div>
                         </div>
-                    </RouterLink>
                 </div>
 
                 <div class="create_proposal form" v-else>
                     <img src="/images/token-transfer.svg" alt="">
-                    <h3>No proposal has been created</h3>
+                    <h3>No funds in DAO's treasure</h3>
                     <p>Ready to distribute tokens or send funds? Initiate a token transfer here. For ideas on how to
                         distribute your community's token, read our guide on token distribution.</p>
-                    <RouterLink :to="`/app/daos/${$route.params.id}/governance/create`">
-                        <button>Create first proposal</button>
+                    <RouterLink :to="`/app/daos/${$route.params.id}/treasure/fund`">
+                        <button>Add funds now</button>
                     </RouterLink>
                 </div>
             </div>
@@ -102,7 +79,7 @@ export default {
             this.loading = false
         },
 
-        sumVotes: function (votes) {
+        sumVotes: function(votes) {
             let sum = 0
             votes.forEach(vote => {
                 sum += vote
@@ -199,7 +176,6 @@ section {
     border-radius: 12px;
     border: rgb(228, 231, 235) 1px solid;
     margin-top: 16px;
-    color: black;
 }
 
 .proposal_created_text {

@@ -1,28 +1,63 @@
 <template>
-    <section>
+    <ProgressView v-if="loading" />
+    <section v-else>
         <div class="app_width">
-            <div class="member_container">
+            <div class="member_container" v-if="dao.membership.participation > 0">
                 <div class="members_info">
                     <IconPeople />
-                    <button>Add members</button>
+                    <RouterLink :to="`/app/daos/${$route.params.id}/members/add`">
+                        <button>Add members</button>
+                    </RouterLink>
                 </div>
 
                 <div class="members_count">
-                    <h3>1 Members</h3>
-                    <p>Token-Based</p>
+                    <h3>{{ dao.membership.multisigMembers.size }} Members</h3>
+                    <p>Wallet-Based</p>
+                </div>
+            </div>
+            <div class="member_container" v-else-if="daoMembers">
+                <div class="members_info">
+                    <IconPeople />
+                    <RouterLink :to="`/app/daos/${$route.params.id}/members/add`">
+                        <button>Add members</button>
+                    </RouterLink>
+                </div>
+
+                <div class="members_count">
+                    <h3>{{ daoMembers.size }} Members</h3>
+                    <p>Wallet-Based</p>
                 </div>
             </div>
 
             <div class="dao_form">
-                <div class="members form">
-                    <div class="member">
+                <div class="members form" v-if="dao.membership.participation > 0">
+                    <div class="member" v-for="memberAddress, i in [...dao.membership.multisigMembers.keys()]" :key="i">
                         <div class="member_info">
                             <img src="" alt="">
-                            <p>Ox207...3488</p>
+                            <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45, memberAddress.length)
+                            }}
+                                {{ $store.state.address == memberAddress ? '(You)' : '' }}
+                            </p>
                         </div>
-                        <a href="">
+                        <a :href="`${memberAddress}`">
                             <div class="member_link">
-                                <p>20 YT (100%)</p>
+                                <p>{{ dao.membership.multisigMembers.get(memberAddress) }} Power (100%)</p>
+                                <IconOut />
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="members form" v-else-if="daoMembers">
+                    <div class="member" v-for="memberAddress, i in [...daoMembers.keys()]" :key="i">
+                        <div class="member_info">
+                            <img src="" alt="">
+                            <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45, 53) }}
+                                {{ $store.state.address == memberAddress ? '(You)' : '' }}
+                            </p>
+                        </div>
+                        <a :href="`https://explorer.testnet.aeternity.io/account/${memberAddress}`" target="_blank">
+                            <div class="member_link">
+                                <p>{{ $fromWei(daoMembers.get(memberAddress)) }} YT (100%)</p>
                                 <IconOut />
                             </div>
                         </a>
@@ -38,19 +73,40 @@
 
 <script>
 import { mapState } from 'vuex';
+import { daoState, tokenBalances } from '../../scripts/aeternity'
+import ProgressView from './ProgressView.vue';
 export default {
     data() {
         return {
             proposal: {
-                title: '',
-                summary: ''
+                title: "",
+                summary: ""
             },
-            step: 1,
-        }
+            loading: true,
+            dao: null,
+            daoMembers: null
+        };
+    },
+    methods: {
+        getDao: async function () {
+            const result = await daoState(this.aeSdk, this.$route.params.id.replace("ak", "ct"));
+            this.dao = result.decodedResult;
+            
+            if (this.dao.membership.participation == 0) {
+                const result = await tokenBalances(this.aeSdk, this.dao.daoToken)
+                this.daoMembers = result.decodedResult
+            }
+            
+            this.loading = false;
+        },
     },
     computed: {
-        ...mapState(['aeSdk'])
+        ...mapState(["aeSdk"])
     },
+    mounted() {
+        this.getDao();
+    },
+    components: { ProgressView }
 }
 </script>
 

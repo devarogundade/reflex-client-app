@@ -1,5 +1,5 @@
 export default {
-  modelAddress: "ct_2StNVEZuHtXpmr8ck7EyzeMVvUavfVwwR6vRTa4ycyaN5uT7g4",
+  modelAddress: "ct_J6HJaU8rGvM5HZEgQjhx57MSb5fFPdb8PvCszZGjaYAYWyJYF",
   aci: [
     {
       "namespace": {
@@ -355,7 +355,19 @@ export default {
               },
               {
                 "name": "_2",
-                "type": "int"
+                "type": {
+                  "option": [
+                    "IRfDAOReward.metadata"
+                  ]
+                }
+              },
+              {
+                "name": "_3",
+                "type": {
+                  "option": [
+                    "string"
+                  ]
+                }
               }
             ],
             "name": "mint",
@@ -460,6 +472,12 @@ export default {
             {
               "DAOMemberAdded": [
                 "address",
+                "int"
+              ]
+            },
+            {
+              "ProposalCreated": [
+                "int",
                 "int"
               ]
             },
@@ -620,6 +638,10 @@ export default {
                 "type": "string"
               },
               {
+                "name": "treasureAmount",
+                "type": "int"
+              },
+              {
                 "name": "startedOn",
                 "type": "int"
               },
@@ -698,6 +720,10 @@ export default {
               {
                 "name": "proposalId",
                 "type": "int"
+              },
+              {
+                "name": "summary",
+                "type": "string"
               }
             ],
             "name": "execute_proposal",
@@ -709,7 +735,21 @@ export default {
           },
           {
             "arguments": [],
-            "name": "topUpMetaBal",
+            "name": "topup_metatx",
+            "payable": true,
+            "returns": {
+              "tuple": []
+            },
+            "stateful": true
+          },
+          {
+            "arguments": [
+              {
+                "name": "summary",
+                "type": "string"
+              }
+            ],
+            "name": "topup_treasure",
             "payable": true,
             "returns": {
               "tuple": []
@@ -819,6 +859,10 @@ export default {
               "type": "RfDAO.proposals"
             },
             {
+              "name": "treasure",
+              "type": "RfDAO.treasure"
+            },
+            {
               "name": "proposalId",
               "type": "int"
             },
@@ -893,6 +937,58 @@ export default {
                       "int"
                     ]
                   }
+                }
+              ]
+            },
+            "vars": []
+          },
+          {
+            "name": "treasure",
+            "typedef": {
+              "record": [
+                {
+                  "name": "balance",
+                  "type": "int"
+                },
+                {
+                  "name": "locked",
+                  "type": "int"
+                },
+                {
+                  "name": "allIn",
+                  "type": "int"
+                },
+                {
+                  "name": "allOut",
+                  "type": "int"
+                },
+                {
+                  "name": "history",
+                  "type": {
+                    "list": [
+                      "RfDAO.treasure_history"
+                    ]
+                  }
+                }
+              ]
+            },
+            "vars": []
+          },
+          {
+            "name": "treasure_history",
+            "typedef": {
+              "record": [
+                {
+                  "name": "summary",
+                  "type": "string"
+                },
+                {
+                  "name": "timestamp",
+                  "type": "int"
+                },
+                {
+                  "name": "amount",
+                  "type": "int"
                 }
               ]
             },
@@ -998,6 +1094,10 @@ export default {
                       "address"
                     ]
                   }
+                },
+                {
+                  "name": "treasureAmount",
+                  "type": "int"
                 }
               ]
             },
@@ -1009,30 +1109,6 @@ export default {
               "map": [
                 "int",
                 "RfDAO.proposal"
-              ]
-            },
-            "vars": []
-          },
-          {
-            "name": "daoState",
-            "typedef": {
-              "record": [
-                {
-                  "name": "metadata",
-                  "type": "RfDAO.metadata"
-                },
-                {
-                  "name": "governance",
-                  "type": "RfDAO.governance"
-                },
-                {
-                  "name": "membership",
-                  "type": "RfDAO.membership"
-                },
-                {
-                  "name": "proposals",
-                  "type": "RfDAO.proposals"
-                }
               ]
             },
             "vars": []

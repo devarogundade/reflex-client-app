@@ -4,24 +4,23 @@
             <div class="explore_container">
                 <h3 class="explore_container_title">Explore DAOs</h3>
                 <div class="apps">
-                    <RouterLink v-for="dao, i in allDaos" :key="i" :to="`/app/daos/${dao}`">
+                    <RouterLink v-for="daoAddress, i in [...allDaos.keys()]" :key="i" :to="`/app/daos/${daoAddress.replace('ak', 'ct')}`">
                         <div class="app">
                             <div class="app_head">
                                 <img src="https://ipfs.eth.aragon.network/ipfs/QmS4TURPPg75etrhFS9z6S6mo2ZzsEq5BmRL463dGbUt9J"
                                     alt="">
                                 <div class="app_head_text">
-                                    <h6>YatsuDAO_Ryufukuji</h6>
-                                    <p>vitalik.eth</p>
+                                   <h6>{{ allDaos.get(daoAddress).name }}</h6>
+                                     <p>{{ allDaos.get(daoAddress).subdomain }}.dao.chain</p>
                                 </div>
                             </div>
                             <p class="app_desc">
-                                This is a DAO to discuss and implement management practices to turn abandoned paddy fields
-                                in
-                                Ryufukuji, Inzai, Chiba, into valuable and
+                                {{ allDaos.get(daoAddress).summary }}
                             </p>
                             <div class="app_category">
                                 <IconPeople />
-                                <p>Token-Based</p>
+                                <p v-if="allDaos.get(daoAddress).participation == 0">Token-Based</p>
+                                <p v-else>Wallet-Based</p>
                             </div>
                         </div>
                     </RouterLink>

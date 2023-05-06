@@ -1,10 +1,9 @@
 <template>
-    <ProgressView v-if="loading" />
-    <section v-else>
+    <section>
         <div class="app_width">
             <div class="create_head">
                 <div class="create_head_title">
-                    <p>Create your DAO proposal</p>
+                    <p>Add funds to DAO's treasure</p>
                     <p>Step {{ step }} of 1</p>
                 </div>
 
@@ -13,7 +12,7 @@
                 </div>
 
                 <div class="create_head_desc" v-if="step == 1">
-                    <h1>Describe your proposal</h1>
+                    <h1>Add funds to treasure</h1>
                     <p>Name and define your DAO so new contributors know they've come to the right place. This information
                         is displayed on the DAO Explore page and can be changed with a vote. For ideas on DAO branding, read
                         our guide.</p>
@@ -23,46 +22,22 @@
             <div class="dao_form">
                 <div class="form">
                     <div class="label" v-show="step == 1">
-                        <p class="title">Proposal title</p>
+                        <p class="title">Summary</p>
                         <p class="desc">Maximum of 128 characters</p>
                         <div class="input">
-                            <input v-model="proposal.title" type="text" placeholder="Type your DAO's name...">
+                            <input v-model="treasure.summary" type="text" placeholder="Write about this fund...">
                         </div>
-                        <p class="count">{{ proposal.title.length }}/128</p>
+                        <p class="count">{{ treasure.summary.length }}/128</p>
                     </div>
 
                     <div class="label" v-show="step == 1">
-                        <p class="title">Proposal summary</p>
-                        <p class="desc">Describe your DAO's purpose in a few sentences. This is listed on the Explore page
-                            so new contributors can find you.
-                        </p>
+                        <p class="title">Amount</p>
+                        <p class="desc">Maximum of 128 characters</p>
                         <div class="input">
-                            <textarea v-model="proposal.summary" rows="5" type="text"
-                                placeholder="Type your summary..."></textarea>
+                            <input v-model="treasure.amount" type="text" placeholder="0.00">
+                            <div class="input_tag">Æ</div>
                         </div>
-                    </div>
-
-                    <div class="label" v-show="step == 1">
-                        <p class="title">Use funds from treasure <input type="checkbox" v-model="useFund" /></p>
-                        <p class="desc" v-if="useFund">The current treasure balance is {{ $fromWei(dao.treasure.balance) }} Æ</p>
-                        <div class="input" v-if="useFund">
-                            <input v-model="proposal.treasureAmount" type="number" placeholder="0.00">
-                        </div>
-                    </div>
-
-                    <div class="label" v-show="step == 1">
-                        <p class="title">Start voting on</p>
-                        <p class="desc">Specify a time in the future to open proposal voting.</p>
-                        <br>
-                        <VueDatePicker v-model="proposal.startedOn" />
-                    </div>
-
-                    <div class="label" v-show="step == 1">
-                        <p class="title">End voting on</p>
-                        <p class="desc">Specify a time in the future to end proposal voting.</p>
-                        <br>
-                        <VueDatePicker v-model="proposal.endedOn" />
-                        <p class="count">Must be at least {{ (Number(dao.governance.minDuration) / (24 * 3600)) }} days interval</p>
+                        <p class="count">{{ treasure.amount.length }}/128</p>
                     </div>
 
                     <!--  -->
@@ -74,7 +49,7 @@
                             </button>
                         </RouterLink>
 
-                        <button v-on:click="create()">Create proposal
+                        <button v-on:click="fund()">Add fund
                             <IconArrowRight :color="'var(--white)'" />
                         </button>
                     </div>
@@ -91,49 +66,43 @@ import IconArrowRight from '../icons/IconArrowRight.vue'
 
 <script>
 import { mapState } from 'vuex';
-import { createProposal, daoState } from '../../scripts/aeternity'
-import ProgressView from './ProgressView.vue';
+import { fundTreasure, daoState } from '../../scripts/aeternity'
 export default {
     data() {
         return {
-            proposal: {
-                title: "",
-                summary: "",
-                treasureAmount: "",
-                startedOn: new Date(),
-                endedOn: new Date()
+            treasure: {
+                summary: '',
+                amount: ''
             },
-            dao: null,
-            loading: true,
-            useFund: false,
             step: 1,
-        };
-    },
-    computed: {
-        ...mapState(["aeSdk"])
-    },
-    watch: {
-        useFund: function () {
-            this.proposal.treasureAmount = "";
         }
     },
+    computed: {
+        ...mapState(['aeSdk'])
+    },
     methods: {
-        create: async function () {
-            const result = await createProposal(this.aeSdk, this.$route.params.id, this.proposal);
-            this.$router.push(`/app/daos/${this.$route.params.id}/governance/${result.decodedEvents[0].args[0]}`);
+        fund: async function () {
+            await fundTreasure(this.aeSdk, this.$route.params.id,
+                this.treasure
+            )
+            this.$router.push(`/app/daos/${this.$route.params.id}/treasure`)
         },
+
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id);
-            this.dao = result.decodedResult;
-            let duration = Number(this.dao.governance.minDuration);
-            this.proposal.endedOn = new Date().setSeconds(this.proposal.startedOn.getSeconds() + duration);
-            this.loading = false;
+            this.dao = result.decodedResult
+            
+            let duration = Number(this.dao.governance.minDuration)
+            this.treasure.endedOn = new Date().setSeconds(
+                this.treasure.startedOn.getSeconds() + duration
+            )
+            
+            this.loading = false
         }
     },
     mounted() {
-        this.getDao();
-    },
-    components: { ProgressView }
+        this.getDao()
+    }
 }
 </script>
 

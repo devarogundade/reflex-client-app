@@ -3,7 +3,7 @@
         <div class="app_width">
             <header>
                 <RouterLink to="/app">
-                    <img src="/images/logo.svg" alt="logo" class="header_logo">
+                    <img src="/images/logo.png" alt="logo" class="header_logo">
                 </RouterLink>
                 <div class="header_menu">
                     <RouterLink :to="`/app/daos/${$route.params.id}`">
@@ -14,6 +14,11 @@
                     <RouterLink :to="`/app/daos/${$route.params.id}/governance`">
                         <div :class="$route.name.startsWith('app-daos-dao-governance') ? 'header_menuitem header_menuactive' : 'header_menuitem'">
                             <p>Governance</p>
+                        </div>
+                    </RouterLink>
+                    <RouterLink :to="`/app/daos/${$route.params.id}/treasure`">
+                        <div :class="$route.name.startsWith('app-daos-dao-treasure') ? 'header_menuitem header_menuactive' : 'header_menuitem'">
+                            <p>Treasure</p>
                         </div>
                     </RouterLink>
                     <RouterLink :to="`/app/daos/${$route.params.id}/members`">
@@ -128,6 +133,7 @@ section {
     top: 0;
     width: 100%;
     backdrop-filter: blur(12px);
+    background: var(--background);
     z-index: 10;
 }
 
@@ -147,21 +153,21 @@ header {
     display: flex;
     align-items: center;
     gap: 20px;
-    width: 60%;
 }
 
 .header_menuitem {
-    color: var(--black);
+    color: var(--white);
     font-weight: normal;
     font-size: 16px;
     line-height: 24px;
     font-weight: 500;
+    padding: 10px 16px;
 }
 
 .header_menuactive {
-    padding: 10px 16px;
     background-color: var(--white);
     border-radius: 12px;
+    color: black;
 }
 
 .header_actions {
@@ -170,9 +176,20 @@ header {
     gap: 10px;
 }
 
+
+.header_actions .connect_wallet {
+    background-color: var(--white);
+    min-width: 190px;
+}
+
+.connect_wallet img {
+    width: 30px;
+}
+
 .header_action {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     cursor: pointer;
     height: 48px;

@@ -4,7 +4,7 @@
         <div class="app_width">
             <div class="create_head">
                 <div class="create_head_title">
-                    <p>Create your DAO proposal</p>
+                    <p>Add new DAO members</p>
                     <p>Step {{ step }} of 1</p>
                 </div>
 
@@ -13,7 +13,7 @@
                 </div>
 
                 <div class="create_head_desc" v-if="step == 1">
-                    <h1>Describe your proposal</h1>
+                    <h1>Add new members</h1>
                     <p>Name and define your DAO so new contributors know they've come to the right place. This information
                         is displayed on the DAO Explore page and can be changed with a vote. For ideas on DAO branding, read
                         our guide.</p>
@@ -22,47 +22,76 @@
 
             <div class="dao_form">
                 <div class="form">
-                    <div class="label" v-show="step == 1">
-                        <p class="title">Proposal title</p>
-                        <p class="desc">Maximum of 128 characters</p>
-                        <div class="input">
-                            <input v-model="proposal.title" type="text" placeholder="Type your DAO's name...">
+                    <div class="label" v-show="step == 1 && dao.membership.participation == 0">
+                        <p class="title">Distribute tokens</p>
+                        <p class="desc">Add the wallets you'd like to distribute tokens to. If you need help distributing
+                            tokens</p>
+                        <div class="address_container" v-if="tokenAllocations.length > 0">
+                            <div class="address_grid">
+                                <p class="address_name">Address</p>
+                                <p class="address_name">Tokens</p>
+                                <!-- <p class="address_name">Allocation</p> -->
+                                <p></p>
+                            </div>
+                            <div class="address_grid" v-for="allocation, i in tokenAllocations" :key="i">
+                                <div class="input">
+                                    <input type="text" v-model="allocation.address" placeholder="ak...">
+                                </div>
+                                <div class="input">
+                                    <input type="number" v-model="allocation.tokens" min="0" placeholder="0"
+                                        style="text-align: center;">
+                                </div>
+                                <!-- <div class="input">
+                                    <input type="text" disabled :value="((allocation.tokens / totalSupply) * 100) + '%'"
+                                        style="background-color: var(--background-gray); text-align: center;">
+                                </div> -->
+                                <IconTrash v-on:click="removeAllocation(i)" />
+                            </div>
+                            <br> <br>
+                            <div class="address_grid">
+                                <p class="address_name">{{ tokenAllocations.length }} Addresses</p>
+                                <p class="address_name">Total: {{ totalSupply }}</p>
+                                <p class="address_name"></p>
+                                <p></p>
+                            </div>
                         </div>
-                        <p class="count">{{ proposal.title.length }}/128</p>
+                        <button v-if="tokenAllocations.length < 1" v-on:click="addAllocation()">Add wallet</button>
                     </div>
 
-                    <div class="label" v-show="step == 1">
-                        <p class="title">Proposal summary</p>
-                        <p class="desc">Describe your DAO's purpose in a few sentences. This is listed on the Explore page
-                            so new contributors can find you.
-                        </p>
-                        <div class="input">
-                            <textarea v-model="proposal.summary" rows="5" type="text"
-                                placeholder="Type your summary..."></textarea>
+                    <div class="label" v-show="step == 1 && dao.membership.participation == 1">
+                        <p class="title">Distribute powers</p>
+                        <p class="desc">Add the wallets you'd like to distribute tokens to. If you need help distributing
+                            tokens</p>
+                        <div class="address_container" v-if="multisigMembers.length > 0">
+                            <div class="address_grid">
+                                <p class="address_name">Address</p>
+                                <p class="address_name">Power</p>
+                                <!-- <p class="address_name">Allocation</p> -->
+                                <p></p>
+                            </div>
+                            <div class="address_grid" v-for="member, i in multisigMembers" :key="i">
+                                <div class="input">
+                                    <input type="text" v-model="member.address" placeholder="ak...">
+                                </div>
+                                <div class="input">
+                                    <input type="number" v-model="member.powers" min="0" placeholder="0"
+                                        style="text-align: center;">
+                                </div>
+                                <!-- <div class="input">
+                                    <input type="text" disabled :value="((member.powers / totalPower) * 100) + '%'"
+                                        style="background-color: var(--background-gray); text-align: center;">
+                                </div> -->
+                                <IconTrash v-on:click="removeMember(i)" />
+                            </div>
+                            <br> <br>
+                            <div class="address_grid">
+                                <p class="address_name">{{ multisigMembers.length }} Addresses</p>
+                                <p class="address_name">Total Power: {{ totalPower }}</p>
+                                <p class="address_name"></p>
+                                <p></p>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="label" v-show="step == 1">
-                        <p class="title">Use funds from treasure <input type="checkbox" v-model="useFund" /></p>
-                        <p class="desc" v-if="useFund">The current treasure balance is {{ $fromWei(dao.treasure.balance) }} Æ</p>
-                        <div class="input" v-if="useFund">
-                            <input v-model="proposal.treasureAmount" type="number" placeholder="0.00">
-                        </div>
-                    </div>
-
-                    <div class="label" v-show="step == 1">
-                        <p class="title">Start voting on</p>
-                        <p class="desc">Specify a time in the future to open proposal voting.</p>
-                        <br>
-                        <VueDatePicker v-model="proposal.startedOn" />
-                    </div>
-
-                    <div class="label" v-show="step == 1">
-                        <p class="title">End voting on</p>
-                        <p class="desc">Specify a time in the future to end proposal voting.</p>
-                        <br>
-                        <VueDatePicker v-model="proposal.endedOn" />
-                        <p class="count">Must be at least {{ (Number(dao.governance.minDuration) / (24 * 3600)) }} days interval</p>
+                        <button v-if="tokenAllocations.length < 1" v-on:click="addMember()">Add member</button>
                     </div>
 
                     <!--  -->
@@ -74,7 +103,11 @@
                             </button>
                         </RouterLink>
 
-                        <button v-on:click="create()">Create proposal
+                        <button v-if="dao.membership.participation == 0" v-on:click="createTokenMember()">Add member
+                            <IconArrowRight :color="'var(--white)'" />
+                        </button>
+
+                        <button v-if="dao.membership.participation == 1" v-on:click="createWalletMember()">Add member
                             <IconArrowRight :color="'var(--white)'" />
                         </button>
                     </div>
@@ -87,51 +120,94 @@
 <script setup>
 import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import IconArrowRight from '../icons/IconArrowRight.vue'
+import IconTrash from '../icons/IconTrash.vue';
 </script>
 
 <script>
 import { mapState } from 'vuex';
-import { createProposal, daoState } from '../../scripts/aeternity'
+import { addMember, daoState } from '../../scripts/aeternity'
 import ProgressView from './ProgressView.vue';
 export default {
     data() {
         return {
-            proposal: {
-                title: "",
-                summary: "",
-                treasureAmount: "",
-                startedOn: new Date(),
-                endedOn: new Date()
-            },
             dao: null,
-            loading: true,
-            useFund: false,
+            tokenAllocations: [
+                {
+                    address: "",
+                    tokens: 0
+                }
+            ],
+            multisigMembers: [
+                {
+                    address: "",
+                    powers: 0
+                }
+            ],
+            totalSupply: 0,
+            totalPower: 0,
             step: 1,
+            loading: true
         };
     },
     computed: {
         ...mapState(["aeSdk"])
     },
     watch: {
-        useFund: function () {
-            this.proposal.treasureAmount = "";
+        tokenAllocations: {
+            handler: function (newTokenAllocations) {
+                this.totalSupply = 0;
+                for (let index = 0; index < newTokenAllocations.length; index++) {
+                    const allocation = newTokenAllocations[index];
+                    this.totalSupply += allocation.tokens;
+                }
+            },
+            deep: true
+        },
+        multisigMembers: {
+            handler: function (newMultisigMembers) {
+                this.totalPower = 0;
+                for (let index = 0; index < newMultisigMembers.length; index++) {
+                    const member = newMultisigMembers[index];
+                    this.totalPower += member.powers;
+                }
+            },
+            deep: true
         }
     },
     methods: {
-        create: async function () {
-            const result = await createProposal(this.aeSdk, this.$route.params.id, this.proposal);
-            this.$router.push(`/app/daos/${this.$route.params.id}/governance/${result.decodedEvents[0].args[0]}`);
+        addAllocation: function () {
+            this.tokenAllocations.push({ address: "", tokens: 0 });
+        },
+        addMember: function () {
+            this.multisigMembers.push({ address: "", powers: 0 });
+        },
+        removeAllocation: function (index) {
+            this.tokenAllocations.splice(index, 1);
+        },
+        removeMember: function (index) {
+            this.multisigMembers.splice(index, 1);
+        },
+        getDays: function (days) {
+            return days * 24 * 3600;
+        },
+        createTokenMember: async function () {
+            if (this.tokenAllocations.length == 0) return
+            await addMember(this.aeSdk, this.$route.params.id, { address: this.tokenAllocations[0].address, value: this.tokenAllocations[0].tokens });
+            this.$router.push(`/app/daos/${this.$route.params.id}/members`);
+        },
+        createWalletMember: async function () {
+            if (this.multisigMembers.length == 0) return
+            await addMember(this.aeSdk, this.$route.params.id, { address: this.multisigMembers[0].address, value: this.multisigMembers[0].powers });
+            this.$router.push(`/app/daos/${this.$route.params.id}/members`);
         },
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id);
             this.dao = result.decodedResult;
-            let duration = Number(this.dao.governance.minDuration);
-            this.proposal.endedOn = new Date().setSeconds(this.proposal.startedOn.getSeconds() + duration);
             this.loading = false;
         }
     },
     mounted() {
-        this.getDao();
+        this.getDao()
     },
     components: { ProgressView }
 }
@@ -279,8 +355,7 @@ section {
     font-size: 16px;
 }
 
-.label input[type=text],
-.label input[type=number] {
+.label input {
     padding: 0 20px;
     font-size: 16px;
     font-weight: 500;
@@ -438,7 +513,7 @@ section {
 
 .address_grid {
     display: grid;
-    grid-template-columns: 280px 200px 100px auto;
+    grid-template-columns: 320px 260px auto;
     gap: 20px;
     align-items: center;
 }

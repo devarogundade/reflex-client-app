@@ -1,5 +1,5 @@
 export default {
-  contractAddress: "ct_2RLLWY2xv2CZtUZ3tpzvcVkXVxkcr57FUJ5htVGEYcF7T1bWxT",
+  contractAddress: "ct_2Ud4XMei5xDsg2xEWfujtqEiawV2UJxLT58J8W7vxt8dR4daBt",
   aci: [
     {
       "namespace": {
@@ -835,8 +835,9 @@ export default {
             {
               "name": "daos",
               "type": {
-                "list": [
-                  "IRfDAO"
+                "map": [
+                  "address",
+                  "RfDAOFactory.dao"
                 ]
               }
             },
@@ -856,6 +857,38 @@ export default {
         },
         "typedefs": [
           {
+            "name": "dao",
+            "typedef": {
+              "record": [
+                {
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "name": "summary",
+                  "type": "string"
+                },
+                {
+                  "name": "logo",
+                  "type": {
+                    "option": [
+                      "string"
+                    ]
+                  }
+                },
+                {
+                  "name": "subdomain",
+                  "type": "string"
+                },
+                {
+                  "name": "participation",
+                  "type": "int"
+                }
+              ]
+            },
+            "vars": []
+          },
+          {
             "name": "ownersDao",
             "typedef": {
               "map": [
@@ -864,30 +897,6 @@ export default {
                   "list": [
                     "IRfDAO"
                   ]
-                }
-              ]
-            },
-            "vars": []
-          },
-          {
-            "name": "daoState",
-            "typedef": {
-              "record": [
-                {
-                  "name": "contractAddress",
-                  "type": "address"
-                },
-                {
-                  "name": "metadata",
-                  "type": "IRfDAO.metadata"
-                },
-                {
-                  "name": "governance",
-                  "type": "IRfDAO.governance"
-                },
-                {
-                  "name": "membership",
-                  "type": "IRfDAO.membership"
                 }
               ]
             },

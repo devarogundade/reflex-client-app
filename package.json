@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aeternity/aepp-sdk": "^13.0.1",
+    "@vuepic/vue-datepicker": "^5.0.1",
     "aeternity-fungible-token": "^2.0.0",
     "bignumber.js": "^4.0.2",
     "ethereumjs-units": "^0.2.0",
