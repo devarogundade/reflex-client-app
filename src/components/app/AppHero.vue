@@ -4,9 +4,10 @@
             <div class="hero_container">
                 <div class="hero_cta">
                     <div class="hero_text_content">
-                        <h1>Explore the DAO World</h1>
-                        <p>Build your DAO, explore communities, and find inspiration for your project all in one place.</p>
+                        <h1>Explore Organizations</h1>
+                        <p>Create and Manage your DAO, explore communities, and find inspiration for your project.</p>
                     </div>
+                    <img src="/images/hero2.png" alt="">
                 </div>
             </div>
 
@@ -34,8 +35,7 @@
                 <div class="create_item">
                     <IconDAO />
                     <h3>Reflex SDK</h3>
-                    <p>Use our governance plugins to build a DAO, dApp, or anything you can imagine on the Aragon OSx
-                        protocol.</p>
+                    <p>Developer kits that developers can plug-in into their codebase to powerhouse project governance and DAOs.</p>
                     <button class="soon">Coming soon</button>
                 </div>
             </div>
@@ -52,6 +52,17 @@ import IconDAO from '../icons/IconBoxTick.vue';
     height: 550px;
     padding-top: 200px;
     position: relative;
+}
+
+.hero_cta {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+}
+
+.hero_cta img {
+    height: 400px;
+    margin-top: -50px;
 }
 
 .hero_text_content {
