@@ -102,11 +102,12 @@
                                     <div class="wining">
                                         <p>Votes ({{ dao.proposals.get(proposalId).votes.size }})</p>
                                         <p>{{ $fromWei(sumVotes(dao.proposals.get(proposalId))) }} ${{
-                                            daoToken.meta_info.symbol }}</p>
+                                            daoToken ? daoToken.meta_info.symbol : 'Power'
+                                        }}</p>
                                     </div>
                                     <div class="progress">
                                         <div class="progress_bar" :style="`width: ${(dao.proposals.get(proposalId).approves.length
-                                            / dao.proposals.get(proposalId).votes.size) * 100}%;`"></div>
+                                                / dao.proposals.get(proposalId).votes.size) * 100}%;`"></div>
                                     </div>
                                     <div class="status">
                                         <p>Ongoing</p>
@@ -161,7 +162,7 @@
                             <p>Wallet-Based</p>
                         </div>
                     </div>
-                    <div class="member_container">
+                    <div class="member_container" v-else>
                         <div class="members_info">
                             <IconPeople />
                             <RouterLink :to="`/app/daos/${$route.params.id}/members/add`">
@@ -186,7 +187,7 @@
                             </div>
                             <a :href="`${memberAddress}`">
                                 <div class="member_link">
-                                    <p>{{ dao.membership.multisigMembers.get(memberAddress) }} Power (100%)</p>
+                                    <p>{{ $fromWei(dao.membership.multisigMembers.get(memberAddress)) }} Power (100%)</p>
                                     <IconOut />
                                 </div>
                             </a>
@@ -241,7 +242,7 @@ export default {
     },
     methods: {
         getDao: async function () {
-            const result = await daoState(this.aeSdk, this.$route.params.id.replace('ak', 'ct'));
+            const result = await daoState(this.aeSdk, this.$route.params.id);
             this.dao = result.decodedResult
 
             if (this.dao.membership.participation == 0) {

@@ -4,7 +4,7 @@
             <div class="app_container">
                 <div class="app_timeline">
                     <div class="app_timeline_button">
-                        <IconFlash />
+                        <IconFlash :color="'var(--background)'" />
                     </div>
                     <div class="app_timeline_stroke"></div>
                 </div>
@@ -12,13 +12,13 @@
                 <div class="app_contents">
                     <div class="app_text_content">
                         <h1>Reflex App <span>Beta</span></h1>
-                        <p class="app_text_content_desc">DAO creation and management platform with no coding required</p>
+                        <p class="app_text_content_desc">Create and manage DAOs with zero coding experience</p>
                         <div class="app_text_actions">
-                            <RouterLink to="/app">
+                            <a href="/app" target="_blank">
                                 <div class="app_text_action">
                                     <p>Learn more</p>
                                 </div>
-                            </RouterLink>
+                            </a>
                         </div>
                     </div>
 
@@ -57,6 +57,7 @@
 
 <script setup>
 import IconBoxTick from '../icons/IconBoxTick.vue';
+import IconFlash from '../icons/IconFlash.vue';
 </script>
 
 <style scoped>
@@ -179,7 +180,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
 }
 
 .app_no_code_content img {
-    width: 550px;
+    height: 280px;
 }
 
 .app_no_code_content p span {
@@ -201,7 +202,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
     align-items: center;
     width: 100%;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: center;
     gap: 30px;
     background-color: #f04e7c;
 }
@@ -215,7 +216,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
 }
 
 .app_governance_content img {
-    width: 100%;
+    height: 300px;
 }
 
 .app_governance_content p span {
@@ -228,9 +229,9 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
     padding: 40px;
     display: flex;
     align-items: center;
+    justify-content: center;
     width: 100%;
     flex-wrap: wrap;
-    justify-content: space-between;
     gap: 30px;
     background-color: #f04e7c;
 }
@@ -244,7 +245,7 @@ import IconBoxTick from '../icons/IconBoxTick.vue';
 }
 
 .app_dao_content img {
-    width: 100%;
+    height: 300px;
 }
 
 .app_dao_content p span {

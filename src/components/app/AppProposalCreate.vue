@@ -44,7 +44,8 @@
 
                     <div class="label" v-show="step == 1">
                         <p class="title">Use funds from treasure <input type="checkbox" v-model="useFund" /></p>
-                        <p class="desc" v-if="useFund">The current treasure balance is {{ $fromWei(dao.treasure.balance) }} Æ</p>
+                        <p class="desc" v-if="useFund">The current treasure balance is {{ $fromWei(dao.treasure.balance) }}
+                            Æ</p>
                         <div class="input" v-if="useFund">
                             <input v-model="proposal.treasureAmount" type="number" placeholder="0.00">
                         </div>
@@ -62,7 +63,8 @@
                         <p class="desc">Specify a time in the future to end proposal voting.</p>
                         <br>
                         <VueDatePicker v-model="proposal.endedOn" />
-                        <p class="count">Must be at least {{ (Number(dao.governance.minDuration) / (24 * 3600)) }} days interval</p>
+                        <p class="count">Must be at least {{ (Number(dao.governance.minDuration) / (24 * 3600)) }} days
+                            interval</p>
                     </div>
 
                     <!--  -->
@@ -81,6 +83,7 @@
                 </div>
             </div>
         </div>
+        <ProgressPop v-if="progress" />
     </section>
 </template>
 
@@ -93,6 +96,7 @@ import IconArrowRight from '../icons/IconArrowRight.vue'
 import { mapState } from 'vuex';
 import { createProposal, daoState } from '../../scripts/aeternity'
 import ProgressView from './ProgressView.vue';
+import ProgressPop from './ProgressPop.vue';
 export default {
     data() {
         return {
@@ -107,6 +111,7 @@ export default {
             loading: true,
             useFund: false,
             step: 1,
+            progress: false
         };
     },
     computed: {
@@ -119,8 +124,17 @@ export default {
     },
     methods: {
         create: async function () {
-            const result = await createProposal(this.aeSdk, this.$route.params.id, this.proposal);
-            this.$router.push(`/app/daos/${this.$route.params.id}/governance/${result.decodedEvents[0].args[0]}`);
+            this.progress = true
+            try {
+                const result = await createProposal(
+                    this.aeSdk,
+                    this.$route.params.id,
+                    this.proposal
+                );
+                this.$router.push(`/app/daos/${this.$route.params.id}/governance/${result.decodedEvents[0].args[0]}`);
+            } catch (error) {
+                alert(error)
+            }
         },
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id);
@@ -133,7 +147,7 @@ export default {
     mounted() {
         this.getDao();
     },
-    components: { ProgressView }
+    components: { ProgressView, ProgressPop }
 }
 </script>
 

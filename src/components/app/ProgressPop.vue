@@ -6,19 +6,22 @@
 
 <style scoped>
 .view {
-    width: 100%;
-    height: 100%;
+    width: 120px;
+    height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: fixed;
-    left: 0;
-    top: 0;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 10px #ccc;
     z-index: 5;
     background: var(--white);
+    border-radius: 12px;
 }
 
 .view img {
-    height: 80px;
+    height: 50px;
 }
 </style>

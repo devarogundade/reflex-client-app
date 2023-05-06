@@ -41,7 +41,7 @@
                         </div>
                         <a :href="`${memberAddress}`">
                             <div class="member_link">
-                                <p>{{ dao.membership.multisigMembers.get(memberAddress) }} Power (100%)</p>
+                                <p>{{ $fromWei(dao.membership.multisigMembers.get(memberAddress)) }} Power (100%)</p>
                                 <IconOut />
                             </div>
                         </a>
@@ -83,13 +83,12 @@ export default {
                 summary: ""
             },
             loading: true,
-            dao: null,
-            daoMembers: null
+            dao: null
         };
     },
     methods: {
         getDao: async function () {
-            const result = await daoState(this.aeSdk, this.$route.params.id.replace("ak", "ct"));
+            const result = await daoState(this.aeSdk, this.$route.params.id);
             this.dao = result.decodedResult;
             
             if (this.dao.membership.participation == 0) {

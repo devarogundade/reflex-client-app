@@ -56,6 +56,7 @@
                 </div>
             </div>
         </div>
+        <ProgressPop v-if="progress" />
     </section>
 </template>
 
@@ -67,42 +68,47 @@ import IconArrowRight from '../icons/IconArrowRight.vue'
 <script>
 import { mapState } from 'vuex';
 import { fundTreasure, daoState } from '../../scripts/aeternity'
+import ProgressPop from './ProgressPop.vue';
 export default {
     data() {
         return {
             treasure: {
-                summary: '',
-                amount: ''
+                summary: "",
+                amount: ""
             },
             step: 1,
-        }
+            progress: false
+        };
     },
     computed: {
-        ...mapState(['aeSdk'])
+        ...mapState(["aeSdk"])
     },
     methods: {
         fund: async function () {
-            await fundTreasure(this.aeSdk, this.$route.params.id,
-                this.treasure
-            )
-            this.$router.push(`/app/daos/${this.$route.params.id}/treasure`)
+            this.progress = true;
+            try {
+                await fundTreasure(
+                    this.aeSdk,
+                    this.$route.params.id,
+                    this.treasure
+                );
+                this.$router.push(`/app/daos/${this.$route.params.id}/treasure`);
+            } catch (error) {
+                alert(error)
+            }
         },
-
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id);
-            this.dao = result.decodedResult
-            
-            let duration = Number(this.dao.governance.minDuration)
-            this.treasure.endedOn = new Date().setSeconds(
-                this.treasure.startedOn.getSeconds() + duration
-            )
-            
-            this.loading = false
+            this.dao = result.decodedResult;
+            let duration = Number(this.dao.governance.minDuration);
+            this.treasure.endedOn = new Date().setSeconds(this.treasure.startedOn.getSeconds() + duration);
+            this.loading = false;
         }
     },
     mounted() {
-        this.getDao()
-    }
+        this.getDao();
+    },
+    components: { ProgressPop }
 }
 </script>
 

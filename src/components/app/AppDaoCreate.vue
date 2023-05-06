@@ -230,7 +230,8 @@
 
                     <div class="label" v-show="step == 2">
                         <p class="title">Proposal creation</p>
-                        <p class="desc">Specify who is permitted to create proposals and what the minimum {{ dao.participation == 0 ? 'token' : 'power' }} requirement
+                        <p class="desc">Specify who is permitted to create proposals and what the minimum {{
+                            dao.participation == 0 ? 'token' : 'power' }} requirement
                             is.</p>
                         <div class="specify_container">
                             <div class="participate_options">
@@ -240,7 +241,8 @@
                                     <div class="option_text">
                                         <h6 v-if="dao.participation == 0">Token holders</h6>
                                         <h6 v-if="dao.participation == 1">Multisig members</h6>
-                                        <p>Only {{ dao.participation == 0 ? 'token holders' : 'multisig members' }} with a certain number of 
+                                        <p>Only {{ dao.participation == 0 ? 'token holders' : 'multisig members' }} with a
+                                            certain number of
                                             {{ dao.participation == 0 ? 'tokens' : 'powers' }} are eligible to create
                                             proposals.</p>
                                     </div>
@@ -263,8 +265,8 @@
                             <div class="tokens_required" :style="dao.proposalCreation == 1 ? 'opacity: 0.5' : ''">
                                 <p class="title">Minimum {{ dao.participation == 0 ? 'tokens' : 'powers' }} Required</p>
                                 <div class="input">
-                                    <input :disabled="dao.proposalCreation == 1" v-model="dao.minCreation" type="number" min="1" placeholder="0"
-                                        style="text-align: center;">
+                                    <input :disabled="dao.proposalCreation == 1" v-model="dao.minCreation" type="number"
+                                        min="1" placeholder="0" style="text-align: center;">
                                     <div class="input_tag">{{ dao.tokenSymbol != '' ? '$' + dao.tokenSymbol : '$Token' }}
                                     </div>
                                 </div>
@@ -363,8 +365,7 @@
                         <p class="desc">Allow proposal execution before the vote ends if the requirements are met and the
                             vote outcome cannot be changed by more voters participating.</p>
                         <div class="participate_options">
-                            <div v-on:click="dao.reward = 1"
-                                :class="dao.reward == 1 ? 'option option_active' : 'option'">
+                            <div v-on:click="dao.reward = 1" :class="dao.reward == 1 ? 'option option_active' : 'option'">
                                 <div class="option_text">
                                     <h6>Non Fungible Token</h6>
                                 </div>
@@ -373,8 +374,7 @@
                                 </div>
                             </div>
 
-                            <div v-on:click="dao.reward = 0"
-                                :class="dao.reward == 0 ? 'option option_active' : 'option'">
+                            <div v-on:click="dao.reward = 0" :class="dao.reward == 0 ? 'option option_active' : 'option'">
                                 <div class="option_text">
                                     <h6>None</h6>
                                 </div>
@@ -417,6 +417,7 @@
                 </div>
             </div>
         </div>
+        <ProgressPop v-if="progress" />
     </section>
 </template>
 
@@ -425,6 +426,7 @@ import IconTrash from '../icons/IconTrash.vue'
 import IconImageAdd from '../icons/IconImageAdd.vue'
 import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import IconArrowRight from '../icons/IconArrowRight.vue'
+import ProgressPop from './ProgressPop.vue'
 </script>
 
 <script>
@@ -467,11 +469,12 @@ export default {
                 earlyExecution: true,
                 gasless: false,
                 reward: 1,
-                rewardUri: ''
+                rewardUri: '',
             },
             totalSupply: 10,
             totalPower: 10,
             step: 1,
+            progress: false
         }
     },
     computed: {
@@ -548,8 +551,13 @@ export default {
             }
 
             if (confirm('Confirm to deploy DAO')) {
-                const result = await deployDao(this.aeSdk, this.dao)
-                this.$router.push(`/app/daos/${result.decodedEvents[0].args[1].replace('ak', 'ct')}`)
+                this.progress = true
+                try {
+                    const result = await deployDao(this.aeSdk, this.dao)
+                    this.$router.push(`/app/daos/${result.decodedEvents[0].args[1].replace('ak', 'ct')}`)
+                } catch (error) {
+                    alert(error)
+                }
             }
         },
         prevStep: function () {

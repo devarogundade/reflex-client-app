@@ -114,6 +114,7 @@
                 </div>
             </div>
         </div>
+        <ProgressPop v-show="progress" />
     </section>
 </template>
 
@@ -121,6 +122,7 @@
 import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import IconArrowRight from '../icons/IconArrowRight.vue'
 import IconTrash from '../icons/IconTrash.vue';
+import ProgressPop from './ProgressPop.vue';
 </script>
 
 <script>
@@ -146,6 +148,7 @@ export default {
             totalSupply: 0,
             totalPower: 0,
             step: 1,
+            progress: false,
             loading: true
         };
     },
@@ -192,13 +195,35 @@ export default {
         },
         createTokenMember: async function () {
             if (this.tokenAllocations.length == 0) return
-            await addMember(this.aeSdk, this.$route.params.id, { address: this.tokenAllocations[0].address, value: this.tokenAllocations[0].tokens });
-            this.$router.push(`/app/daos/${this.$route.params.id}/members`);
+            this.progress = true
+            try {
+                await addMember(
+                    this.aeSdk,
+                    this.$route.params.id,
+                    {
+                        address: this.tokenAllocations[0].address,
+                        value: this.tokenAllocations[0].tokens
+                    });
+                    this.$router.push(`/app/daos/${this.$route.params.id}/members`);
+            } catch (error) {
+                alert(error)
+            }
         },
         createWalletMember: async function () {
             if (this.multisigMembers.length == 0) return
-            await addMember(this.aeSdk, this.$route.params.id, { address: this.multisigMembers[0].address, value: this.multisigMembers[0].powers });
-            this.$router.push(`/app/daos/${this.$route.params.id}/members`);
+            this.progress = true
+            try {
+                await addMember(
+                    this.aeSdk,
+                    this.$route.params.id,
+                    {
+                        address: this.multisigMembers[0].address,
+                        value: this.multisigMembers[0].powers
+                    });
+                    this.$router.push(`/app/daos/${this.$route.params.id}/members`);
+            } catch (error) {
+                alert(error)
+            }
         },
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id);

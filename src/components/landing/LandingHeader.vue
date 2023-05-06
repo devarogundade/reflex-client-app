@@ -28,12 +28,12 @@
                     </a>
                 </div>
                 <div class="header_actions">
-                    <RouterLink to="/app">
+                    <a href="/app" target="_blank">
                         <div class="header_action">
                             <IconFlash :color="'var(--background)'" />
                             <p>Launch your DAO</p>
                         </div>
-                    </RouterLink>
+                    </a>
                     <a href="" target="_blank">
                         <div class="header_action">
                             <IconCode :color="'var(--white)'" />

@@ -9,11 +9,11 @@
                     <p class="summary">{{ proposal.summary }}</p>
                     <P class="created">Created on
                         {{
-                                $toDate(Number(dao.proposals.get(proposalId).createdOn)).month + ',' +
-                                $toDate(Number(dao.proposals.get(proposalId).createdOn)).date + ' ' +
-                                $toDate(Number(dao.proposals.get(proposalId).createdOn)).hour + ':' +
-                                $toDate(Number(dao.proposals.get(proposalId).createdOn)).min
-                            }}
+                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).month + ',' +
+                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).date + ' ' +
+                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).hour + ':' +
+                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).min
+                        }}
                     </P>
                 </div>
             </div>
@@ -103,6 +103,7 @@
                 </div>
             </div>
         </div>
+        <ProgressPop v-if="progress" />
     </section>
 </template>
 
@@ -114,6 +115,7 @@ import { voteProposal, daoState, executeProposal, approve, allowance } from '../
 
 <script>
 import { mapState } from 'vuex';
+import ProgressPop from './ProgressPop.vue';
 export default {
     computed: {
         ...mapState(["aeSdk"])
@@ -126,75 +128,97 @@ export default {
             // eslint-disable-next-line no-undef
             proposalId: BigInt(this.$route.params.pid),
             daoMembers: null,
-            allocation: 0
+            allocation: 0,
+            progress: false
         };
     },
     methods: {
         getAllowance: async function () {
             const result = await allowance(
-                this.aeSdk, 
-                this.dao.daoToken, 
-                this.$store.state.address, 
-                this.$route.params.id
-            )
-
-            const allocation = result.decodedResult
-            if (allocation) this.allocation = allocation
-        },
-        approveToken: async function () {
-            await approve(
                 this.aeSdk,
                 this.dao.daoToken,
-                this.$route.params.id,
-                this.$toWei('10000000000')
-            )
-            
-            this.getAllowance()
+                this.$store.state.address,
+                this.$route.params.id
+            );
+            const allocation = result.decodedResult;
+            if (allocation)
+                this.allocation = allocation;
+        },
+        approveToken: async function () {
+            this.progress = true
+            try {
+                await approve(
+                    this.aeSdk,
+                    this.dao.daoToken,
+                    this.$route.params.id,
+                    this.$toWei("10000000000")
+                );
+                this.getAllowance();
+            } catch (error) {
+                alert(error)
+            }
         },
         execute: async function () {
-            const result = await executeProposal(this.aeSdk, this.$route.params.id, this.proposalId,
-                "Sent proposal required amount from treasure to DAO owner's wallet"
-            )
-
-            console.log(result);
+            this.progress = true
+            try {
+                await executeProposal(
+                    this.aeSdk,
+                    this.$route.params.id,
+                    this.proposalId,
+                    "Sent proposal required amount from treasure to DAO owner's wallet"
+                );
+                this.progress = false
+                this.getDao()
+            } catch (error) {
+                alert(error)
+            }
         },
         vote: async function (cast, gasless) {
-            await voteProposal(this.aeSdk, this.$route.params.id, this.proposalId, {
-                amount: this.dao.governance.minParticipation,
-                cast: cast,
-                gasless: gasless
-            })
-
-            this.getDao()
+            this.progress = true
+            try {
+                await voteProposal(
+                    this.aeSdk,
+                    this.$route.params.id,
+                    this.proposalId, {
+                    amount: this.dao.governance.minParticipation,
+                    cast: cast,
+                    gasless: gasless
+                });
+                this.progress = false
+                this.getDao();
+            } catch (error) {
+                alert(error)
+            }
         },
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id);
-            this.dao = result.decodedResult
-            this.proposal = this.dao.proposals.get(this.proposalId)
-            this.loading = false
-            this.getAllowance()
+            this.dao = result.decodedResult;
+            this.proposal = this.dao.proposals.get(this.proposalId);
+            this.loading = false;
+            this.getAllowance();
         },
         getApprovesVotesCount: function () {
-            let sum = 0
+            let sum = 0;
             console.log(this.proposal.approves);
             for (let index = 0; index < this.proposal.approves.length; index++) {
-                const voter = this.proposal.approves[index]
-                sum += Number(this.proposal.votes.get(voter))
+                const voter = this.proposal.approves[index];
+                sum += Number(this.proposal.votes.get(voter));
             }
-            return sum
+            return sum;
         },
         getDisApprovesVotesCount: function () {
-            let sum = 0
+            let sum = 0;
             for (let index = 0; index < this.proposal.disapproves.length; index++) {
-                const voter = this.proposal.disapproves[index]
-                sum += Number(this.proposal.votes.get(voter))
+                const voter = this.proposal.disapproves[index];
+                sum += Number(this.proposal.votes.get(voter));
             }
-            return sum
+            return sum;
         },
     },
     mounted() {
         this.getDao();
-    }
+    },
+    components: { ProgressPop }
 }
 </script>
 

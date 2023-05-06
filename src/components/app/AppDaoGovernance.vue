@@ -16,51 +16,65 @@
 
                 <div class="proposals form" v-if="dao.proposals && dao.proposals.size > 0">
                     <RouterLink v-for="proposalId, i in [...dao.proposals.keys()]" :key="i"
-                        :to="`/app/daos/${$route.params.id.replace('ak', 'ct')}/governance/${proposalId}`">
-                        <div class="proposal">
-                            <div class="proposal_info">
-                                <span>Active</span>
-                                <div class="proposal_info_time">
-                                    <IconClock />
-                                    <p>
-                                        {{
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).month + ',' +
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).date + ' ' +
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).hour + ':' +
-                                            $toDate(Number(dao.proposals.get(proposalId).startedOn)).min
-                                        }} —
-                                        {{
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).month + ',' +
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).date + ' ' +
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).hour + ':' +
-                                            $toDate(Number(dao.proposals.get(proposalId).endedOn)).min
-                                        }}
-                                    </p>
+                            :to="`/app/daos/${$route.params.id.replace('ak', 'ct')}/governance/${proposalId}`">
+                            <div class="proposal">
+                                <div class="proposal_info">
+                                    <span style="background-color: red;"
+                                        v-if="getProposalState(dao.proposals.get(proposalId)) == 'Ended'">Ended</span>
+                                    <span style="background-color: green;"
+                                        v-else-if="getProposalState(dao.proposals.get(proposalId)) == 'Upcoming'">Upcoming</span>
+                                    <span v-else>{{ getProposalState(dao.proposals.get(proposalId)) }}</span>
+                                    <div class="proposal_info_time">
+                                        <IconClock />
+                                        <p>
+                                            {{
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).month + ',' +
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).date + ' ' +
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).hour + ':' +
+                                                $toDate(Number(dao.proposals.get(proposalId).startedOn)).min
+                                            }} —
+                                            {{
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).month + ',' +
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).date + ' ' +
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).hour + ':' +
+                                                $toDate(Number(dao.proposals.get(proposalId).endedOn)).min
+                                            }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="proposal_head">
+                                    <h3>{{ dao.proposals.get(proposalId).title }}</h3>
+                                    <p class="desc">{{ dao.proposals.get(proposalId).summary }}</p>
+                                    <p class="published">Published by <a
+                                            :href="`https://explorer.testnet.aeternity.io/account/${dao.proposals.get(proposalId).owner}`">{{
+                                                dao.proposals.get(proposalId).owner.substring(0, 10) + '...' +
+                                                dao.proposals.get(proposalId).owner.substring(45, 53)
+                                            }}
+                                        </a> on {{
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).month + ',' +
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).date + ' ' +
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).hour + ':' +
+                                            $toDate(Number(dao.proposals.get(proposalId).createdOn)).min
+                                        }}</p>
+                                </div>
+                                <div class="proposal_vote">
+                                    <div class="wining">
+                                        <p>Votes ({{ dao.proposals.get(proposalId).votes.size }})</p>
+                                        <p>{{ $fromWei(sumVotes(dao.proposals.get(proposalId))) }} ${{
+                                            daoToken ? daoToken.meta_info.symbol : 'Power'
+                                        }}</p>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress_bar" :style="`width: ${(dao.proposals.get(proposalId).approves.length
+                                                / dao.proposals.get(proposalId).votes.size) * 100}%;`"></div>
+                                    </div>
+                                    <div class="status">
+                                        <p>Ongoing</p>
+                                        <p>100%</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="proposal_head">
-                                <h3>{{ dao.proposals.get(proposalId).title }}</h3>
-                                <p class="desc">{{ dao.proposals.get(proposalId).summary }}</p>
-                                <p class="published">Published by <a href="">{{
-                                    dao.proposals.get(proposalId).owner.substring(0, 10) + '...' +
-                                    dao.proposals.get(proposalId).owner.substring(45, 53)
-                                }}</a></p>
-                            </div>
-                            <div class="proposal_vote">
-                                <div class="wining">
-                                    <p>Votes</p>
-                                    <p>{{ sumVotes(dao.proposals.get(proposalId).votes) }} YT</p>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress_bar"></div>
-                                </div>
-                                <div class="status">
-                                    <p>Ongoing</p>
-                                    <p>100%</p>
-                                </div>
-                            </div>
-                        </div>
-                    </RouterLink>
+                        </RouterLink>
                 </div>
 
                 <div class="create_proposal form" v-else>
@@ -97,17 +111,25 @@ export default {
     },
     methods: {
         getDao: async function () {
-            const result = await daoState(this.aeSdk, this.$route.params.id.replace('ak', 'ct'));
+            const result = await daoState(this.aeSdk, this.$route.params.id);
             this.dao = result.decodedResult
             this.loading = false
         },
-
-        sumVotes: function (votes) {
+        sumVotes: function (proposal) {
             let sum = 0
-            votes.forEach(vote => {
-                sum += vote
-            });
+            let keys = [...proposal.votes.keys()]
+            for (let index = 0; index < keys.length; index++) {
+                sum += Number(proposal.votes.get(keys[index]));
+            }
             return sum
+        },
+        getProposalState: function (proposal) {
+            const now = new Date().getTime()
+            if (proposal.executed) return "Executed"
+            if (now > proposal.startedOn && now < proposal.endedOn) return "On-going"
+            if (now < proposal.startedOn) return "Upcoming"
+            if (now > proposal.endedOn) return "Ended"
+            return ""
         }
     },
     mounted() {

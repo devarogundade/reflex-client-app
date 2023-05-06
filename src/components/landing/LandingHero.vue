@@ -11,8 +11,8 @@
 
                 <div class="hero_contents">
                     <div class="hero_text_content">
-                        <h1>Build Better, Together</h1>
-                        <p class="hero_text_content_desc">Launch your DAO aeternity blockchain and experiment with
+                        <h1>Trustless. Transparent. Decentralized.</h1>
+                        <p class="hero_text_content_desc">Launch your on the DAO aeternity blockchain and experience
                             governance at the speed of internet.</p>
                         <div class="hero_text_actions">
                             <RouterLink to="/app">
@@ -29,7 +29,7 @@
                         </div>
                     </div>
                     <div class="image_text_content">
-                        <img src="/images/hero.svg" alt="">
+                        <img src="/images/hero.png" alt="">
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@ import IconDiscover from '../icons/IconDiscover.vue';
 }
 
 .hero_text_content {
-    width: 650px;
+    width: 700px;
     max-width: 100%;
     padding-bottom: 220px;
 }
@@ -148,7 +148,7 @@ import IconDiscover from '../icons/IconDiscover.vue';
 }
 
 .image_text_content {
-    width: 500px;
+    width: 280px;
 }
 
 .image_text_content img {
