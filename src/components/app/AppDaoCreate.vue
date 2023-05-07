@@ -362,8 +362,7 @@
 
                     <div class="label" v-show="step == 4">
                         <p class="title">Reward type</p>
-                        <p class="desc">Allow proposal execution before the vote ends if the requirements are met and the
-                            vote outcome cannot be changed by more voters participating.</p>
+                        <p class="desc">Reward your DAO community and participants with non fungible tokens (NFTs).</p>
                         <div class="participate_options">
                             <div v-on:click="dao.reward = 1" :class="dao.reward == 1 ? 'option option_active' : 'option'">
                                 <div class="option_text">

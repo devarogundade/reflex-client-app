@@ -179,7 +179,7 @@
                     <div class="members" v-if="dao.membership.participation > 0">
                         <div class="member" v-for="memberAddress, i in [...dao.membership.multisigMembers.keys()]" :key="i">
                             <div class="member_info">
-                                <img src="" alt="">
+                                <img src="/images/user.jpg" alt="">
                                 <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45,
                                     memberAddress.length) }}
                                     {{ $store.state.address == memberAddress ? '(You)' : '' }}
@@ -196,7 +196,7 @@
                     <div class="members" v-else-if="daoToken">
                         <div class="member" v-for="memberAddress, i in [...daoToken.balances.keys()]" :key="i">
                             <div class="member_info">
-                                <img src="" alt="">
+                                <img src="/images/user.jpg" alt="">
                                 <p>{{ memberAddress.substring(0, 10) + '...' + memberAddress.substring(45, 53) }}
                                     {{ $store.state.address == memberAddress ? '(You)' : '' }}
                                 </p>
