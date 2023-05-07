@@ -37,8 +37,11 @@
                         </div>
                     </div>
 
-                    <div class="favourite">
-                        <IconStar />
+                    <div class="links">
+                        <a v-for="link, i in JSON.parse(dao.metadata.links)" :href="link.link" target="_blank" :key="i">
+                            {{ link.name }}
+                        </a>
+                        <IconStar class="favourite" />
                     </div>
                 </div>
             </div>
@@ -353,10 +356,23 @@ section {
     gap: 8px;
 }
 
+.links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.links a {
+    font-weight: 500;
+    color: var(--background);
+}
+
 .favourite {
     background-color: var(--background-gray);
-    padding: 10px 12px;
+    padding: 10px;
     border-radius: 12px;
+    width: 50px;
+    height: 50px;
 }
 
 .detail_tail_options .option p {

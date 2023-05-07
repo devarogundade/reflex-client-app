@@ -4,14 +4,15 @@
             <div class="explore_container">
                 <h3 class="explore_container_title">Explore DAOs</h3>
                 <div class="apps">
-                    <RouterLink v-for="daoAddress, i in [...allDaos.keys()]" :key="i" :to="`/app/daos/${daoAddress.replace('ak', 'ct')}`">
+                    <RouterLink v-for="daoAddress, i in [...allDaos.keys()]" :key="i"
+                        :to="`/app/daos/${daoAddress.replace('ak', 'ct')}`">
                         <div class="app">
                             <div class="app_head">
                                 <img src="https://ipfs.eth.aragon.network/ipfs/QmS4TURPPg75etrhFS9z6S6mo2ZzsEq5BmRL463dGbUt9J"
                                     alt="">
                                 <div class="app_head_text">
-                                   <h6>{{ allDaos.get(daoAddress).name }}</h6>
-                                     <p>{{ allDaos.get(daoAddress).subdomain }}.dao.chain</p>
+                                    <h6>{{ allDaos.get(daoAddress).name }}</h6>
+                                    <p>{{ allDaos.get(daoAddress).subdomain }}.dao.chain</p>
                                 </div>
                             </div>
                             <p class="app_desc">
@@ -25,6 +26,9 @@
                         </div>
                     </RouterLink>
                 </div>
+        <div class="progress" v-if="progress">
+            <img src="/images/loading_logo.svg" alt="">
+        </div>
             </div>
         </div>
     </section>
@@ -39,16 +43,18 @@ import { mapState } from 'vuex';
 import { factoryState } from '../../scripts/aeternity';
 export default {
     computed: {
-        ...mapState(['aeSdk']),
+        ...mapState(["aeSdk"]),
     },
     data() {
         return {
-            allDaos: []
-        }
+            allDaos: [],
+            progress: true
+        };
     },
     async mounted() {
-        const result = await factoryState(this.aeSdk)
-        this.allDaos = result.decodedResult.daos
+        const result = await factoryState(this.aeSdk);
+        this.allDaos = result.decodedResult.daos;
+        this.progress = false
     }
 }
 </script>
@@ -57,6 +63,7 @@ export default {
 section {
     padding-top: 200px;
     padding-bottom: 100px;
+    min-height: 100vh;
     background-color: var(--background-gray);
 }
 
