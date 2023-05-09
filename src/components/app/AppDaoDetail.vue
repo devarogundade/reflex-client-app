@@ -122,7 +122,7 @@
                     </div>
 
                     <div class="create_proposal" v-else>
-                        <img src="/images/token-transfer.svg" alt="">
+                        <img src="/images/no-proposal.svg" alt="">
                         <h3>No proposal has been created</h3>
                         <p>Ready to distribute tokens or send funds? Initiate a token transfer here. For ideas on how to
                             distribute your community's token, read our guide on token distribution.</p>
@@ -422,7 +422,6 @@ section {
 
 .create_proposal img {
     height: 260px;
-    transform: scale(1.5, 1.5);
 }
 
 .create_proposal h3 {
