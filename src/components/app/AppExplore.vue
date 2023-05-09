@@ -8,8 +8,8 @@
                         :to="`/app/daos/${daoAddress.replace('ak', 'ct')}`">
                         <div class="app">
                             <div class="app_head">
-                                <img src="https://ipfs.eth.aragon.network/ipfs/QmS4TURPPg75etrhFS9z6S6mo2ZzsEq5BmRL463dGbUt9J"
-                                    alt="">
+                                <img v-if="allDaos.get(daoAddress).logo != undefined" :src="allDaos.get(daoAddress).logo" alt="">
+                                <img v-else src="/images/company.png" alt="">
                                 <div class="app_head_text">
                                     <h6>{{ allDaos.get(daoAddress).name }}</h6>
                                     <p>{{ allDaos.get(daoAddress).subdomain }}.dao.chain</p>
@@ -26,9 +26,9 @@
                         </div>
                     </RouterLink>
                 </div>
-        <div class="progress" v-if="progress">
-            <img src="/images/loading_logo.svg" alt="">
-        </div>
+                <div class="progress" v-if="progress">
+                    <img src="/images/loading_logo.svg" alt="">
+                </div>
             </div>
         </div>
     </section>

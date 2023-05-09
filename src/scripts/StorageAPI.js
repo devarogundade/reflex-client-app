@@ -19,14 +19,24 @@ const firebaseConfig = {
   };
 
 const StorageAPI = {
+    toBase64: function (file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        })
+    },
     upload(blob, name) {
         const firebaseApp = initializeApp(firebaseConfig);
         getAnalytics(firebaseApp);
 
+        console.log(blob);
+
         return new Promise((resolve, reject) => {
             console.log('Uploading video ...');
             const storage = getStorage();
-            const storageRef = ref(storage, `faces/${name}`);
+            const storageRef = ref(storage, `images/${name}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
             uploadTask.on('state_changed',
                 (snapshot) => {
@@ -39,8 +49,9 @@ const StorageAPI = {
                     reject(error);
                 },
                 async () => {
-                    await getDownloadURL(uploadTask.snapshot.ref)
-                    resolve(`https://storage.googleapis.com/crossart-aea81.appspot.com/faces/${name}`);
+                    const url = await getDownloadURL(uploadTask.snapshot.ref)
+                    console.log(url);
+                    resolve(url);
                 }
             );
         });

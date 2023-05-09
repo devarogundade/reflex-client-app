@@ -89,7 +89,10 @@
                         <button v-on:click="vote(false, false)">Vote down</button>
                     </div>
 
-                    <div class="vote_actions" v-else>
+                    <div class="vote_actions" v-else-if="dao.membership.participation == 1">
+                        <button>You don't have enough power</button>
+                    </div>
+                    <div class="vote_actions" v-else-if="dao.membership.participation == 0">
                         <button v-on:click="approveToken()">Approve voting token</button>
                     </div>
                 </div>
@@ -134,6 +137,13 @@ export default {
     },
     methods: {
         getAllowance: async function () {
+            if (this.dao.membership.participation == 1) {
+                let address = this.$store.state.address
+                if (!address) this.allocation = 0
+                this.allocation = this.dao.membership.multisigMembers.get(address)
+                return
+            }
+
             const result = await allowance(
                 this.aeSdk,
                 this.dao.daoToken,
@@ -199,11 +209,11 @@ export default {
         },
         getApprovesVotesCount: function () {
             let sum = 0;
-            console.log(this.proposal.approves);
             for (let index = 0; index < this.proposal.approves.length; index++) {
                 const voter = this.proposal.approves[index];
                 sum += Number(this.proposal.votes.get(voter));
-            }
+            };
+            if (!sum) sum = 0
             return sum;
         },
         getDisApprovesVotesCount: function () {
@@ -212,6 +222,7 @@ export default {
                 const voter = this.proposal.disapproves[index];
                 sum += Number(this.proposal.votes.get(voter));
             }
+            if (!sum) sum = 0
             return sum;
         },
     },

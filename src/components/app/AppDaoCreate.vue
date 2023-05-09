@@ -390,7 +390,7 @@
 
                         <div class="input_file nft_input_file">
                             <IconImageAdd />
-                            <input v-on:change="pickLogo($event)" type="file" accept="image/*">
+                            <input v-on:change="pickNFT($event)" type="file" accept="image/*">
                         </div>
                     </div>
 
@@ -431,6 +431,7 @@ import ProgressPop from './ProgressPop.vue'
 <script>
 import { mapState } from 'vuex';
 import { deployDao } from '../../scripts/aeternity'
+import StorageAPI from '../../scripts/StorageAPI'
 export default {
     data() {
         return {
@@ -473,7 +474,9 @@ export default {
             totalSupply: 10,
             totalPower: 10,
             step: 1,
-            progress: false
+            progress: false,
+            logoFile: null,
+            nftFile: null
         }
     },
     computed: {
@@ -497,6 +500,22 @@ export default {
         }
     },
     methods: {
+        pickLogo: function (e) {
+            const files = e.target.files
+            if (files.length > 0) {
+                this.logoFile = files[0]
+            } else {
+                this.logoFile = null
+            }
+        },
+        pickNFT: function (e) {
+            const files = e.target.files
+            if (files.length > 0) {
+                this.nftFile = files[0]
+            } else {
+                this.nftFile = null
+            }
+        },
         deploy: async function () {
             if (this.dao.name == '') {
                 alert('Enter DAO name')
@@ -525,12 +544,22 @@ export default {
                 alert('Enter DAO token symbol')
                 return
             }
-            for (let index = 0; index < this.dao.tokenAllocations.length; index++) {
-                const address = this.dao.tokenAllocations[index];
-                if (address.address == '' || address.tokens == '') {
-                    alert(`Enter a valid link member address and token at ${index + 1}`)
+            if (this.dao.participation == 0) {
+                for (let index = 0; index < this.dao.tokenAllocations.length; index++) {
+                    const address = this.dao.tokenAllocations[index];
+                    if (address.address == '' || address.tokens == '') {
+                        alert(`Enter a valid member address and tokens at ${index + 1}`)
+                        return
+                    }
+                }
+            } else {
+                for (let index = 0; index < this.dao.multisigMembers.length; index++) {
+                const address = this.dao.multisigMembers[index];
+                if (address.address == '' || address.powers == '') {
+                    alert(`Enter a valid member address and powers at ${index + 1}`)
                     return
                 }
+            }
             }
             if (this.dao.proposalCreation == 0 && this.dao.minCreation == '') {
                 alert('Enter DAO minimum token for creation')
@@ -552,6 +581,16 @@ export default {
             if (confirm('Confirm to deploy DAO')) {
                 this.progress = true
                 try {
+                    if (this.logoFile) {
+                        const imageUrl = await StorageAPI.upload(this.logoFile, this.dao.subdomain)
+                        if (imageUrl) this.dao.logoUri = imageUrl
+                    }
+
+                    // if (this.nftFile) {
+                    //     const nftUrl = await StorageAPI.upload(this.nftFile, this.dao.subdomain)
+                    //     if (nftUrl) this.dao.nftUri = nftUrl
+                    // }
+
                     const result = await deployDao(this.aeSdk, this.dao)
                     this.$router.push(`/app/daos/${result.decodedEvents[0].args[1].replace('ak', 'ct')}`)
                 } catch (error) {

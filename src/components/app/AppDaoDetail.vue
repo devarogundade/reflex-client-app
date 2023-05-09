@@ -16,8 +16,8 @@
                         </p>
                     </div>
                     <div class="detail_head_image">
-                        <img src="https://ipfs.eth.aragon.network/ipfs/QmS4TURPPg75etrhFS9z6S6mo2ZzsEq5BmRL463dGbUt9J"
-                            alt="">
+                        <img v-if="dao.metadata.logo != undefined" :src="dao.metadata.logo" alt="">
+                        <img v-else src="/images/company.png" alt="">
                     </div>
                 </div>
                 <div class="detail_tail">
