@@ -4,8 +4,11 @@ import daofactoryconfig from '../acis/daofactoryconfig';
 import daoconfig from '../acis/daoconfig';
 import Converter from './Converter'
 
-let factoryContract = null
+import { MemoryAccount, Tag } from '@aeternity/aepp-sdk'
 
+const SECRET_KEY = import.meta.env.VITE_SECRET_KEY
+
+let factoryContract = null
 
 // DAO
 
@@ -73,8 +76,8 @@ export const voteProposal = async (sdk, contractAddress, proposalId, vote) => {
         vote.amount,
         vote.cast,
         vote.gasless, {
-            omitUnknown: true
-        }
+        omitUnknown: true
+    }
     )
 }
 
@@ -143,7 +146,7 @@ export const deployDao = async (sdk, dao) => {
         dao.threshold,
         Converter.toWei(dao.minParticipation),
         multisigMembers,
-        (dao.minDuration * 24 * 3600  * 1000),
+        (dao.minDuration * 24 * 3600 * 1000),
         dao.earlyExecution,
         dao.metaTransaction,
         dao.reward,
@@ -215,4 +218,54 @@ export const rewardState = async (sdk, rewardAddress) => {
     })
 
     return await tokenContract.get_state()
+}
+
+
+// Meta transaction
+
+export const signVotingCall = async (sdk, contractAddress, proposalId, vote) => {
+    const contract = await sdk.initializeContract({
+        aci: daoconfig.aci,
+        address: contractAddress
+    })
+
+    const calldata = contract.calldata.encode(
+        'RfDAO',
+        'vote_proposal',
+        [
+            proposalId,
+            vote.amount,
+            vote.cast,
+            vote.gasless
+            // , {
+            //     omitUnknown: true
+            // }
+        ]
+    );
+
+    const contractCallTx = await sdk.buildTx(Tag.ContractCallTx, {
+        callerId: sdk.address,
+        contractId: contractAddress,
+        amount: 0,
+        gasLimit: 1000000,
+        gasPrice: 1500000000,
+        callData: calldata,
+    });
+
+    const signedContractCallTx = await sdk.signTransaction(
+        contractCallTx,
+        {
+            onAccount: sdk.address,
+            innerTx: true
+        },
+    );
+
+    const payerAccount = new MemoryAccount(SECRET_KEY)
+
+    return await sdk.payForTransaction(
+        signedContractCallTx,
+        {
+            onAccount: payerAccount
+        }
+    );
 }
