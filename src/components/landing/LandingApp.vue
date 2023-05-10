@@ -44,9 +44,7 @@
                     </div>
                     <div class="app_custom_ui_content">
                         <IconBoxTick :color="'var(--background)'" />
-                        <P><span>Aragon ODS.</span> Design a user-friendly, custom UI for your Aragon App with our Open
-                            Design
-                            System.</P>
+                        <P><span>Reflex SDK.</span> Developer kits that developers can plug-in into their codebase to powerhouse project governance and DAOs.</P>
                         <div class="soon">Coming soon</div>
                     </div>
                 </div>
@@ -175,7 +173,6 @@ import IconFlash from '../icons/IconFlash.vue';
     width: 500px;
     font-size: 30px;
     color: #ffd9d9;
-    opacity: 0.8;
     max-width: 100%;
 }
 
@@ -211,7 +208,6 @@ import IconFlash from '../icons/IconFlash.vue';
     width: 500px;
     font-size: 30px;
     color: #ffd9d9;
-    opacity: 0.8;
     max-width: 100%;
 }
 
@@ -240,7 +236,6 @@ import IconFlash from '../icons/IconFlash.vue';
     width: 500px;
     font-size: 30px;
     color: #ffd9d9;
-    opacity: 0.8;
     max-width: 100%;
 }
 
@@ -265,9 +260,13 @@ import IconFlash from '../icons/IconFlash.vue';
 .app_custom_ui_content p {
     margin-top: 20px;
     font-size: 30px;
-    color: var(--white);
-    width: 500px;
+    color: #ffd9d9;
+    width: 650px;
     max-width: 100%;
+}
+
+.app_custom_ui_content p span {
+    color: var(--white);
 }
 
 .app_custom_ui_content .soon {

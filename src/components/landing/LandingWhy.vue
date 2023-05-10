@@ -45,7 +45,7 @@ import IconBlockchain from '../icons/IconBoxTick.vue'
 section {
     background-color: var(--background-gray);
     padding: 100px 0;
-    padding-top: 200px;
+    padding-top: 350px;
 }
 
 .why_container_title {
