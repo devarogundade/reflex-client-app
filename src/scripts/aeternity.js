@@ -2,13 +2,23 @@ import daotoken from '../acis/daotoken';
 import daoreward from '../acis/daoreward'
 import daofactoryconfig from '../acis/daofactoryconfig';
 import daoconfig from '../acis/daoconfig';
+import daosubdomain from '../acis/daosubdomain';
 import Converter from './Converter'
 
 import { MemoryAccount, Tag } from '@aeternity/aepp-sdk'
 
 const SECRET_KEY = import.meta.env.VITE_SECRET_KEY
 
-let factoryContract = null
+// DAO SUBDOMAIN
+
+export const subdomainState = async (sdk) => {
+    const contract = await sdk.initializeContract({
+        aci: daosubdomain.aci,
+        address: daosubdomain.contractAddress
+    })
+
+    return await contract.get_state()
+}
 
 // DAO
 
@@ -95,6 +105,8 @@ export const executeProposal = async (sdk, contractAddress, proposalId, summary)
 
 // DAO FACTORY
 
+let factoryContract = null
+
 export const factoryState = async (sdk) => {
     let contract = null
 
@@ -135,7 +147,7 @@ export const deployDao = async (sdk, dao) => {
     return await contract.create_dao(
         dao.name,
         dao.summary,
-        dao.subdomain,
+        dao.subdomain.toLowerCase().trim(),
         JSON.stringify(dao.links),
         dao.logoUri,
         dao.tokenName,

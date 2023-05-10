@@ -1,5 +1,5 @@
 export default {
-    modelAddress: "ct_2vQCkUVN4tWAffkRUWPPgyptYzmCTpknfSVRSr2HcfsRGs58mm",
+    contractAddress: "ct_2vQCkUVN4tWAffkRUWPPgyptYzmCTpknfSVRSr2HcfsRGs58mm",
     aci: [
         {
             "namespace": {

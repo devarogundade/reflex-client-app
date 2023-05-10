@@ -45,19 +45,21 @@
                         <div class="input">
                             <input v-model="dao.name" type="text" placeholder="Type your DAO's name...">
                         </div>
-                        <p class="count">0/128</p>
+                        <p class="count">{{ dao.name.length }}/128</p>
                     </div>
 
                     <div class="label" v-show="step == 1">
                         <p class="title">AENS Subdomain</p>
                         <p class="desc">This will be your DAO’s AENS unique subdomain, created automatically for you.
                             Lowercase letters, numbers, and the dash '-' are all acceptable characters; ideally, the
-                            character count should be under 128.</p>
+                            character count should be under 64.</p>
                         <div class="input">
                             <input v-model="dao.subdomain" type="text" placeholder="Type your DAO's name...">
                             <div class="input_tag">.dao.chain</div>
                         </div>
-                        <p class="count">0/128</p>
+                        <p class="count">{{ dao.subdomain.length }}/64</p>
+                        <p style="color: green;" v-if="dao.subdomain != '' && isNameAvailable">Name is available</p>
+                        <p style="color: red;" v-else-if="dao.subdomain != '' && !isNameAvailable">Name is not available</p>
                     </div>
 
                     <div class="label" v-show="step == 1">
@@ -430,7 +432,7 @@ import ProgressPop from './ProgressPop.vue'
 
 <script>
 import { mapState } from 'vuex';
-import { deployDao } from '../../scripts/aeternity'
+import { subdomainState, deployDao } from '../../scripts/aeternity'
 import StorageAPI from '../../scripts/StorageAPI'
 export default {
     data() {
@@ -476,7 +478,8 @@ export default {
             step: 1,
             progress: false,
             logoFile: null,
-            nftFile: null
+            nftFile: null,
+            isNameAvailable: true
         }
     },
     computed: {
@@ -495,11 +498,17 @@ export default {
                     const member = newDao.multisigMembers[index];
                     this.totalPower += member.powers
                 }
+                this.checkIsNameAvailable(this.dao.subdomain)
             },
             deep: true
         }
     },
     methods: {
+        checkIsNameAvailable: async function (subdomain) {
+            const result = await subdomainState(this.aeSdk)
+            const availability = result.decodedResult.availability
+            this.isNameAvailable = availability.get(subdomain.toLowerCase().trim()) == undefined
+        },
         pickLogo: function (e) {
             const files = e.target.files
             if (files.length > 0) {
@@ -554,12 +563,12 @@ export default {
                 }
             } else {
                 for (let index = 0; index < this.dao.multisigMembers.length; index++) {
-                const address = this.dao.multisigMembers[index];
-                if (address.address == '' || address.powers == '') {
-                    alert(`Enter a valid member address and powers at ${index + 1}`)
-                    return
+                    const address = this.dao.multisigMembers[index];
+                    if (address.address == '' || address.powers == '') {
+                        alert(`Enter a valid member address and powers at ${index + 1}`)
+                        return
+                    }
                 }
-            }
             }
             if (this.dao.proposalCreation == 0 && this.dao.minCreation == '') {
                 alert('Enter DAO minimum token for creation')
