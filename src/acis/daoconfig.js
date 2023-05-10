@@ -1,5 +1,5 @@
 export default {
-  modelAddress: "ct_J6HJaU8rGvM5HZEgQjhx57MSb5fFPdb8PvCszZGjaYAYWyJYF",
+  modelAddress: "ct_2NJTq2YvG5sJq4tTNDr8nL5B5pseuwhX4JgYcRjiFqvxNJNbj2",
   aci: [
     {
       "namespace": {
@@ -682,6 +682,20 @@ export default {
                 "type": "int"
               }
             ],
+            "name": "distribute_proposal_powers",
+            "payable": false,
+            "returns": {
+              "tuple": []
+            },
+            "stateful": true
+          },
+          {
+            "arguments": [
+              {
+                "name": "proposalId",
+                "type": "int"
+              }
+            ],
             "name": "end_proposal_early",
             "payable": false,
             "returns": {
@@ -1029,6 +1043,10 @@ export default {
                       "IRfDAOReward"
                     ]
                   }
+                },
+                {
+                  "name": "metaFeeReceiver",
+                  "type": "address"
                 }
               ]
             },

@@ -1,5 +1,5 @@
 export default {
-  contractAddress: "ct_2Ud4XMei5xDsg2xEWfujtqEiawV2UJxLT58J8W7vxt8dR4daBt",
+  contractAddress: "ct_R9LQ9PRLRvBues64a3CRb8vAWtMirgJLAwhF28CjouxsdyQpT",
   aci: [
     {
       "namespace": {
@@ -679,6 +679,57 @@ export default {
     },
     {
       "contract": {
+        "functions": [
+          {
+            "arguments": [
+              {
+                "name": "_1",
+                "type": "address"
+              }
+            ],
+            "name": "getSubdomain",
+            "payable": false,
+            "returns": "IRfSubdomain.subdomain",
+            "stateful": false
+          },
+          {
+            "arguments": [
+              {
+                "name": "_1",
+                "type": "string"
+              }
+            ],
+            "name": "register",
+            "payable": false,
+            "returns": "unit",
+            "stateful": true
+          }
+        ],
+        "kind": "contract_interface",
+        "name": "IRfSubdomain",
+        "payable": false,
+        "typedefs": [
+          {
+            "name": "subdomain",
+            "typedef": {
+              "record": [
+                {
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "name": "last_update",
+                  "type": "int"
+                }
+              ]
+            },
+            "vars": []
+          }
+        ]
+      }
+    },
+    {
+      "contract": {
         "event": {
           "variant": [
             {
@@ -704,6 +755,10 @@ export default {
               {
                 "name": "dao_model",
                 "type": "IRfDAO"
+              },
+              {
+                "name": "rfSubdomain",
+                "type": "IRfSubdomain"
               }
             ],
             "name": "init",
@@ -852,6 +907,10 @@ export default {
             {
               "name": "dao_model",
               "type": "IRfDAO"
+            },
+            {
+              "name": "rfSubdomain",
+              "type": "IRfSubdomain"
             }
           ]
         },

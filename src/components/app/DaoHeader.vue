@@ -8,7 +8,7 @@
                 <div class="header_menu">
                     <RouterLink :to="`/app/daos/${$route.params.id}`">
                         <div :class="$route.name == 'app-daos-dao' ? 'header_menuitem header_menuactive' : 'header_menuitem'">
-                            <p>Dashboard</p>
+                            <p>Overview</p>
                         </div>
                     </RouterLink>
                     <RouterLink :to="`/app/daos/${$route.params.id}/governance`">
