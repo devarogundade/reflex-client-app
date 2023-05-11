@@ -1,5 +1,5 @@
 export default {
-  contractAddress: "ct_R9LQ9PRLRvBues64a3CRb8vAWtMirgJLAwhF28CjouxsdyQpT",
+  contractAddress: "ct_goqhgdQUHbjfqo7xqXbEbsaAKKM9HPJ7y2spoLD1ybrdwi2v3",
   aci: [
     {
       "namespace": {
@@ -418,6 +418,57 @@ export default {
       "contract": {
         "functions": [
           {
+            "arguments": [
+              {
+                "name": "_1",
+                "type": "address"
+              }
+            ],
+            "name": "getSubdomain",
+            "payable": false,
+            "returns": "IRfSubdomain.subdomain",
+            "stateful": false
+          },
+          {
+            "arguments": [
+              {
+                "name": "_1",
+                "type": "string"
+              }
+            ],
+            "name": "register",
+            "payable": false,
+            "returns": "unit",
+            "stateful": true
+          }
+        ],
+        "kind": "contract_interface",
+        "name": "IRfSubdomain",
+        "payable": false,
+        "typedefs": [
+          {
+            "name": "subdomain",
+            "typedef": {
+              "record": [
+                {
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "name": "last_update",
+                  "type": "int"
+                }
+              ]
+            },
+            "vars": []
+          }
+        ]
+      }
+    },
+    {
+      "contract": {
+        "functions": [
+          {
             "arguments": [],
             "name": "metadata",
             "payable": false,
@@ -523,6 +574,10 @@ export default {
               {
                 "name": "_19",
                 "type": "IRfDAOReward"
+              },
+              {
+                "name": "_20",
+                "type": "IRfSubdomain"
               }
             ],
             "name": "init",
@@ -669,57 +724,6 @@ export default {
                       "IRfDAOReward"
                     ]
                   }
-                }
-              ]
-            },
-            "vars": []
-          }
-        ]
-      }
-    },
-    {
-      "contract": {
-        "functions": [
-          {
-            "arguments": [
-              {
-                "name": "_1",
-                "type": "address"
-              }
-            ],
-            "name": "getSubdomain",
-            "payable": false,
-            "returns": "IRfSubdomain.subdomain",
-            "stateful": false
-          },
-          {
-            "arguments": [
-              {
-                "name": "_1",
-                "type": "string"
-              }
-            ],
-            "name": "register",
-            "payable": false,
-            "returns": "unit",
-            "stateful": true
-          }
-        ],
-        "kind": "contract_interface",
-        "name": "IRfSubdomain",
-        "payable": false,
-        "typedefs": [
-          {
-            "name": "subdomain",
-            "typedef": {
-              "record": [
-                {
-                  "name": "name",
-                  "type": "string"
-                },
-                {
-                  "name": "last_update",
-                  "type": "int"
                 }
               ]
             },

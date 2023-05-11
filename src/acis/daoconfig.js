@@ -1,5 +1,5 @@
 export default {
-  modelAddress: "ct_2NJTq2YvG5sJq4tTNDr8nL5B5pseuwhX4JgYcRjiFqvxNJNbj2",
+  modelAddress: "ct_BTjBznmg5UMUMpK3zECmvQ1Ntfoo75wubmSo9uyYJPYv4BPu2",
   aci: [
     {
       "namespace": {
@@ -453,6 +453,57 @@ export default {
     },
     {
       "contract": {
+        "functions": [
+          {
+            "arguments": [
+              {
+                "name": "_1",
+                "type": "address"
+              }
+            ],
+            "name": "getSubdomain",
+            "payable": false,
+            "returns": "IRfSubdomain.subdomain",
+            "stateful": false
+          },
+          {
+            "arguments": [
+              {
+                "name": "_1",
+                "type": "string"
+              }
+            ],
+            "name": "register",
+            "payable": false,
+            "returns": "unit",
+            "stateful": true
+          }
+        ],
+        "kind": "contract_interface",
+        "name": "IRfSubdomain",
+        "payable": false,
+        "typedefs": [
+          {
+            "name": "subdomain",
+            "typedef": {
+              "record": [
+                {
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "name": "last_update",
+                  "type": "int"
+                }
+              ]
+            },
+            "vars": []
+          }
+        ]
+      }
+    },
+    {
+      "contract": {
         "event": {
           "variant": [
             {
@@ -582,6 +633,10 @@ export default {
               {
                 "name": "reward_model",
                 "type": "IRfDAOReward"
+              },
+              {
+                "name": "rfSubdomain",
+                "type": "IRfSubdomain"
               }
             ],
             "name": "init",

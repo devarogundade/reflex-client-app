@@ -1,5 +1,5 @@
 export default {
-  modelAddress: "ct_kHShHUGpkyPMxgc4ZND5ZM1SrfKVc5wDTXWvoHbnz4MCGDwXz",
+  modelAddress: "ct_bSL6N6xuy3dzLetESvbwY4kz41d4RRGsbBtX1RRKN8GcuPmVN",
   aci: [
     {
       "namespace": {
