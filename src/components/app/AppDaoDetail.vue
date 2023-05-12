@@ -113,7 +113,7 @@
                                                 / dao.proposals.get(proposalId).votes.size) * 100}%;`"></div>
                                     </div>
                                     <div class="status">
-                                        <p>Ongoing</p>
+                                        <p>{{ getProposalState(dao.proposals.get(proposalId)) }}</p>
                                         <p>100%</p>
                                     </div>
                                 </div>

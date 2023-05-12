@@ -99,7 +99,7 @@
 
                 <div class="token_container">
                     <img src="/images/token-transfer.svg" alt="">
-                    <h3>Make your first deposit</h3>
+                    <h3>Execute proposal</h3>
                     <p>Begin by making your first treasury deposit. Learn more about managing a DAO treasury in this
                         guide.</p>
                     <button v-on:click="execute()">Execute proposal</button>
