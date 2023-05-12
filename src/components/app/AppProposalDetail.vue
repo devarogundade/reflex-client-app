@@ -7,6 +7,7 @@
                     <h3>{{ proposal.title }}</h3>
                     <p class="published">Published by <a href="">{{ proposal.owner }}</a></p>
                     <p class="summary">{{ proposal.summary }}</p>
+                    <br>
                     <P class="created">Created on
                         {{
                             $toDate(Number(dao.proposals.get(proposalId).createdOn)).month + ',' +
@@ -150,6 +151,7 @@ export default {
                 this.$store.state.address,
                 this.$route.params.id
             );
+
             const allocation = result.decodedResult;
             if (allocation)
                 this.allocation = allocation;
@@ -167,6 +169,8 @@ export default {
             } catch (error) {
                 alert(error)
             }
+
+            this.progress = false
         },
         execute: async function () {
             this.progress = true
@@ -177,11 +181,12 @@ export default {
                     this.proposalId,
                     "Sent proposal required amount from treasure to DAO owner's wallet"
                 );
-                this.progress = false
                 this.getDao()
             } catch (error) {
                 alert(error)
             }
+
+            this.progress = false
         },
         vote: async function (cast, gasless) {
             this.progress = true
@@ -194,11 +199,13 @@ export default {
                     cast: cast,
                     gasless: gasless
                 });
-                this.progress = false
+
                 this.getDao();
             } catch (error) {
                 alert(error)
             }
+
+            this.progress = false
         },
         getDao: async function () {
             const result = await daoState(this.aeSdk, this.$route.params.id);
